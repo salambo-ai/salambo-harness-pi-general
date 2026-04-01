@@ -1,14 +1,8 @@
 import imageConfig from '../../harness-config/docker.js';
 import type { ImageConfig } from './image-schema.js';
 
-let validated = false;
-
 export function getImageConfig(): ImageConfig {
-  if (!validated) {
-    assertValidImageConfig(imageConfig);
-    validated = true;
-  }
-
+  assertValidImageConfig(imageConfig);
   return imageConfig;
 }
 

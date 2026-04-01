@@ -48,7 +48,6 @@ function createRouterHarness(options?: {
     runAgentSandbox: async (runOptions: RunSandboxOptions) => {
       runCalls.push(runOptions);
     },
-    buildStreamName: (sandboxId: string) => `agent-session:${sandboxId}`,
     getEventBackend: () => 'local' as const,
     getLocalEvents: () => options?.localEvents ?? null,
     clearActiveSandbox: () => {

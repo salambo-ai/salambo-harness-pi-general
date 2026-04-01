@@ -1,6 +1,6 @@
-import { defineImage } from '../src/platform/image-schema.js';
+import type { ImageConfig } from '../src/platform/image-schema.js';
 
-export default defineImage({
+const imageConfig = {
   apt: [
     'git',
     'python3',
@@ -31,4 +31,6 @@ export default defineImage({
   ],
 
   setup: '',
-});
+} satisfies ImageConfig;
+
+export default imageConfig;

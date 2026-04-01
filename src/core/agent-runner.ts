@@ -133,20 +133,6 @@ function serializeError(error: unknown) {
   return { message: 'Unknown error' };
 }
 
-async function publishSandboxReady(params: {
-  stream: EventSink;
-  sessionId: string;
-  sandboxId: string;
-  timestamp: string;
-}, deps: AgentRunnerDeps) {
-  await deps.appendJsonEvent(params.stream, {
-    type: 'sandbox.run.ready',
-    sandboxId: params.sandboxId,
-    sessionId: params.sessionId,
-    timestamp: params.timestamp,
-  });
-}
-
 export async function runAgentSandbox(
   options: RunSandboxOptions,
   deps: AgentRunnerDeps = defaultDeps,
@@ -207,12 +193,12 @@ export async function runAgentSandbox(
     sessionId = piSession.sessionId;
     deps.rememberPiSession(sessionId, piSession.sessionFile ?? sessionManager.getSessionFile());
 
-    await publishSandboxReady({
-      stream,
-      sessionId,
+    await deps.appendJsonEvent(stream, {
+      type: 'sandbox.run.ready',
       sandboxId: options.sandboxId,
+      sessionId,
       timestamp: ts(),
-    }, deps);
+    });
 
     unsubscribe = piSession.subscribe((event) => {
       messageCount++;

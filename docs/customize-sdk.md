@@ -40,6 +40,12 @@ This is the default pi system prompt seed copied into `PI_HOME` for container/lo
 
 The runner also supports per-request `systemPrompt` overrides through the existing Salambo API.
 
+Auth stays pi-native too:
+
+- put pi auth where pi expects it in runtime `PI_HOME`
+- or use provider API key environment variables
+- the template does not silently copy auth from another local pi home
+
 ## `harness-config/pi-agent-home/extensions/`
 
 This is the template-level pi extension directory.

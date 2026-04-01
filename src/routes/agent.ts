@@ -25,7 +25,6 @@ type AgentRouterDeps = {
   setupWorkspace: () => Promise<WorkspacePaths>;
   ensureFileWatcher: (workspace: WorkspacePaths) => Promise<void>;
   runAgentSandbox: (options: RunSandboxOptions) => Promise<void>;
-  buildStreamName: (sandboxId: string) => string;
   getEventBackend: typeof getEventBackend;
   getLocalEvents: typeof getLocalEvents;
   clearActiveSandbox: typeof clearActiveSandbox;
@@ -40,7 +39,6 @@ const defaultDeps: AgentRouterDeps = {
   setupWorkspace,
   ensureFileWatcher,
   runAgentSandbox,
-  buildStreamName,
   getEventBackend,
   getLocalEvents,
   clearActiveSandbox,
@@ -77,7 +75,7 @@ export function createAgentRouter(deps: AgentRouterDeps = defaultDeps) {
     }
 
     const isResuming = typeof sessionId === 'string' && sessionId.length > 0;
-    const streamName = deps.buildStreamName(sandboxId);
+    const streamName = buildStreamName(sandboxId);
     const abortController = new AbortController();
 
     // Queue if another sandbox run is active

@@ -1,24 +1,13 @@
-type PiSessionRecord = {
-  sessionFile?: string;
-  updatedAt: string;
-};
-
-const piSessions = new Map<string, PiSessionRecord>();
+const piSessions = new Map<string, string>();
 
 export function rememberPiSession(sessionId: string, sessionFile?: string) {
-  piSessions.set(sessionId, {
-    sessionFile,
-    updatedAt: new Date().toISOString(),
-  });
+  if (!sessionFile) {
+    return;
+  }
+
+  piSessions.set(sessionId, sessionFile);
 }
 
 export function getPiSessionFile(sessionId: string) {
-  return piSessions.get(sessionId)?.sessionFile;
-}
-
-export function getPiSessionRegistrySnapshot() {
-  return Array.from(piSessions.entries()).map(([sessionId, record]) => ({
-    sessionId,
-    ...record,
-  }));
+  return piSessions.get(sessionId);
 }

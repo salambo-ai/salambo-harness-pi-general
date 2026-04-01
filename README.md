@@ -72,6 +72,7 @@ The main pi-specific harness surface is:
 - pi auth/config defaults to `PI_HOME`
 - local default `PI_HOME` is `./harness-config/pi-agent-home`
 - Docker default `PI_HOME` is `/home/node/.pi/agent`
+- local auth is not copied implicitly from `~/.pi/agent`; use normal pi auth files or provider env vars
 - resume support is adapted to the Salambo `sessionId` contract via an internal pi session registry
 
 ## Native Pi Layout
