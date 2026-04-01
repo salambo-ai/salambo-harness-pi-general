@@ -170,6 +170,15 @@ export async function runAgentSandbox(
     timestamp: ts(),
   });
 
+  if (options.isResuming && sessionId) {
+    await deps.appendJsonEvent(stream, {
+      type: 'sandbox.run.ready',
+      sandboxId: options.sandboxId,
+      sessionId,
+      timestamp: ts(),
+    });
+  }
+
   try {
     const sessionManager = await deps.createSessionManager({
       cwd: options.workspace.root,
@@ -190,15 +199,19 @@ export async function runAgentSandbox(
       resourceLoader,
     });
     piSession = created.session;
-    sessionId = piSession.sessionId;
-    deps.rememberPiSession(sessionId, piSession.sessionFile ?? sessionManager.getSessionFile());
+    const runtimeSessionId = piSession.sessionId;
+    const stableSessionId = options.isResuming && options.sessionId ? options.sessionId : runtimeSessionId;
+    sessionId = stableSessionId;
+    deps.rememberPiSession(stableSessionId, piSession.sessionFile ?? sessionManager.getSessionFile());
 
-    await deps.appendJsonEvent(stream, {
-      type: 'sandbox.run.ready',
-      sandboxId: options.sandboxId,
-      sessionId,
-      timestamp: ts(),
-    });
+    if (!options.isResuming || !options.sessionId) {
+      await deps.appendJsonEvent(stream, {
+        type: 'sandbox.run.ready',
+        sandboxId: options.sandboxId,
+        sessionId: stableSessionId,
+        timestamp: ts(),
+      });
+    }
 
     unsubscribe = piSession.subscribe((event) => {
       messageCount++;

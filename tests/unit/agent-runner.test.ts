@@ -195,3 +195,76 @@ test('runAgentSandbox emits sandbox.run.cancelled when aborted', async () => {
     ['sandbox.run.init', 'sandbox.run.ready', 'session.event', 'sandbox.run.cancelled'],
   );
 });
+
+test('runAgentSandbox keeps the caller sessionId stable across resumed runs', async () => {
+  let listener: ((event: unknown) => void) | undefined;
+
+  const fakeSession = {
+    sessionId: 'pi-runtime-session-3',
+    sessionFile: '/tmp/pi-session-3.jsonl',
+    async prompt() {
+      listener?.({ type: 'agent_end', stopReason: 'end_turn' });
+    },
+    async abort() {},
+    dispose() {},
+    subscribe(fn: (event: unknown) => void) {
+      listener = fn;
+      return () => {
+        listener = undefined;
+      };
+    },
+  };
+
+  await runAgentSandbox(
+    {
+      sandboxId: 'runner-sandbox-3',
+      sessionId: 'platform-session-3',
+      prompt: 'Resume me',
+      abortController: new AbortController(),
+      streamName: 'agent-session:runner-sandbox-3',
+      isResuming: true,
+      workspace: makeWorkspace(),
+    },
+    {
+      async createAgentSession() {
+        return { session: fakeSession };
+      },
+      createResourceLoader: async () => ({
+        async reload() {},
+      }),
+      createSessionManager: async () => ({
+        getSessionFile: () => '/tmp/pi-session-3.jsonl',
+      }),
+      rememberPiSession: () => {},
+      createEventSink: (sandboxId, streamName) => ({
+        kind: 'local',
+        sandboxId,
+        streamName,
+      }),
+      appendJsonEvent: (await import('../../src/core/event-store.js')).appendJsonEvent,
+      sendSessionEventToStream: (await import('../../src/core/event-store.js')).sendSessionEventToStream,
+      finishSandboxLifecycle: () => {},
+    },
+  );
+
+  const localEvents = getLocalEvents('runner-sandbox-3', 10);
+  assert.ok(localEvents);
+  assert.deepEqual(
+    localEvents.events.map((event) => event.payload.sessionId),
+    [
+      undefined,
+      'platform-session-3',
+      'platform-session-3',
+      'platform-session-3',
+    ],
+  );
+  assert.deepEqual(
+    localEvents.events.map((event) => event.payload.type),
+    [
+      'sandbox.run.init',
+      'sandbox.run.ready',
+      'session.event',
+      'sandbox.run.complete',
+    ],
+  );
+});
