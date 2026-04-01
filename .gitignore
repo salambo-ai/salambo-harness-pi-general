@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+coverage/
+.nyc_output/
+.artifacts/
+.codex-home/*
+!.codex-home/config.toml
+harness-config/codex-home/*
+!harness-config/codex-home/config.toml
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+Thumbs.db
