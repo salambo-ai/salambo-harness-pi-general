@@ -17,7 +17,6 @@ function makeWorkspace() {
 
 test('runAgentSandbox emits ordered sandbox run lifecycle and raw session events', async () => {
   const sentPrompts: string[] = [];
-  const rememberedSessions: Array<{ sessionId: string; sessionFile?: string }> = [];
   let subscribed = false;
   let listener: ((event: unknown) => void) | undefined;
   let capturedCreateSessionOptions:
@@ -87,9 +86,6 @@ test('runAgentSandbox emits ordered sandbox run lifecycle and raw session events
           getSessionFile: () => '/tmp/pi-session-1.jsonl',
         };
       },
-      rememberPiSession(sessionId, sessionFile) {
-        rememberedSessions.push({ sessionId, sessionFile });
-      },
       createEventSink: (sandboxId, streamName) => ({
         kind: 'local',
         sandboxId,
@@ -110,9 +106,6 @@ test('runAgentSandbox emits ordered sandbox run lifecycle and raw session events
   assert.equal(capturedResourceLoaderOptions?.cwd, '/workspace');
   assert.equal(capturedResourceLoaderOptions?.agentDir, PI_HOME);
   assert.equal(capturedResourceLoaderOptions?.systemPrompt, undefined);
-  assert.deepEqual(rememberedSessions, [
-    { sessionId: 'pi-session-1', sessionFile: '/tmp/pi-session-1.jsonl' },
-  ]);
 
   const localEvents = getLocalEvents('runner-sandbox-1', 10);
   assert.ok(localEvents);
@@ -173,7 +166,6 @@ test('runAgentSandbox emits sandbox.run.cancelled when aborted', async () => {
       createSessionManager: async () => ({
         getSessionFile: () => '/tmp/pi-session-2.jsonl',
       }),
-      rememberPiSession: () => {},
       createEventSink: (sandboxId, streamName) => ({
         kind: 'local',
         sandboxId,
@@ -235,7 +227,6 @@ test('runAgentSandbox keeps the caller sessionId stable across resumed runs', as
       createSessionManager: async () => ({
         getSessionFile: () => '/tmp/pi-session-3.jsonl',
       }),
-      rememberPiSession: () => {},
       createEventSink: (sandboxId, streamName) => ({
         kind: 'local',
         sandboxId,

@@ -73,7 +73,7 @@ The main pi-specific harness surface is:
 - local default `PI_HOME` is `./harness-config/pi-agent-home`
 - Docker default `PI_HOME` is `/home/node/.pi/agent`
 - local auth is not copied implicitly from `~/.pi/agent`; use normal pi auth files or provider env vars
-- resume support is adapted to the Salambo `sessionId` contract via an internal pi session registry
+- resume support uses pi's own persisted session listing plus `sessionId` matching
 
 ## Native Pi Layout
 
@@ -132,4 +132,4 @@ npm run harness:materialize
 - local tests pass
 - typecheck passes
 - the top-level docs and machine config are now pi-oriented
-- the main remaining follow-up is persisting the pi session registry across process restarts
+- resume now follows pi's own persisted session model more directly

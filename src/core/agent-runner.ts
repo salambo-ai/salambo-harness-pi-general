@@ -6,13 +6,8 @@ import {
   createEventSink,
   sanitizePayload,
   sendSessionEventToStream,
-  type EventSink,
 } from './event-store.js';
 import { finishSandboxLifecycle } from './session-state.js';
-import {
-  getPiSessionFile,
-  rememberPiSession,
-} from './pi-session-registry.js';
 
 export type RunSandboxOptions = {
   sandboxId: string;
@@ -30,7 +25,6 @@ type AgentRunnerDeps = {
   createAgentSession: (options: CreatePiSessionOptions) => Promise<{ session: PiSession }>;
   createResourceLoader: (options: CreatePiResourceLoaderOptions) => Promise<PiResourceLoader>;
   createSessionManager: (params: CreatePiSessionManagerOptions) => Promise<PiSessionManager>;
-  rememberPiSession: typeof rememberPiSession;
   createEventSink: typeof createEventSink;
   appendJsonEvent: typeof appendJsonEvent;
   sendSessionEventToStream: typeof sendSessionEventToStream;
@@ -99,16 +93,20 @@ const defaultDeps: AgentRunnerDeps = {
     const sessionDir = path.join(PI_HOME, 'sessions');
 
     if (resumeSessionId) {
-      const sessionFile = getPiSessionFile(resumeSessionId);
-      if (!sessionFile) {
-        throw new Error(`No persisted pi session found for sessionId ${resumeSessionId}`);
+      const sessions = await SessionManager.list(cwd, sessionDir);
+      const match = sessions.find((session: { id?: unknown; path?: unknown }) =>
+        session.id === resumeSessionId && typeof session.path === 'string',
+      );
+
+      if (!match || typeof match.path !== 'string') {
+        throw new Error(`No persisted pi session found for sessionId ${resumeSessionId} in ${cwd}`);
       }
-      return SessionManager.open(sessionFile, sessionDir) as PiSessionManager;
+
+      return SessionManager.open(match.path, sessionDir) as PiSessionManager;
     }
 
     return SessionManager.create(cwd, sessionDir) as PiSessionManager;
   },
-  rememberPiSession,
   createEventSink,
   appendJsonEvent,
   sendSessionEventToStream,
@@ -202,7 +200,6 @@ export async function runAgentSandbox(
     const runtimeSessionId = piSession.sessionId;
     const stableSessionId = options.isResuming && options.sessionId ? options.sessionId : runtimeSessionId;
     sessionId = stableSessionId;
-    deps.rememberPiSession(stableSessionId, piSession.sessionFile ?? sessionManager.getSessionFile());
 
     if (!options.isResuming || !options.sessionId) {
       await deps.appendJsonEvent(stream, {

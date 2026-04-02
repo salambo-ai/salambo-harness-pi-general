@@ -58,10 +58,11 @@ This layer explains:
 2. The platform layer prepares the workspace and event sink.
 3. Startup seeds runtime `PI_HOME` from `harness-config/pi-agent-home/`.
 4. The runner creates or resumes a pi session with `agentDir = PI_HOME` and `cwd = /workspace`, so pi sees both seeded defaults and workspace `.pi/` overrides.
-5. The sandbox emits:
+5. On resume, the runner asks pi for persisted sessions in that workspace and opens the one whose pi session id matches the caller-provided `sessionId`.
+6. The sandbox emits:
    - `sandbox.run.*` lifecycle events
    - raw `session.event` payloads
-6. The platform consumes those events downstream for logging, SSE, and projections.
+7. The platform consumes those events downstream for logging, SSE, and projections.
 
 ## Invariants
 
