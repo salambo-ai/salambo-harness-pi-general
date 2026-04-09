@@ -1,16 +1,16 @@
-import type { ImageConfig } from '../src/platform/image-schema.js';
+import { defineImage } from '../src/platform/image-schema.js';
 
-const imageConfig = {
+export default defineImage({
   apt: [
     'git',
     'python3',
     'python3-venv',
     'python3-pip',
     'curl',
+    'ca-certificates',
     'vim',
   ],
 
-  // Install the pi CLI globally for container-side debugging and parity with local usage.
   npm: [
     '@mariozechner/pi-coding-agent',
   ],
@@ -31,6 +31,4 @@ const imageConfig = {
   ],
 
   setup: '',
-} satisfies ImageConfig;
-
-export default imageConfig;
+});

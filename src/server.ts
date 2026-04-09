@@ -1,6 +1,7 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
 import { PORT, WORKSPACE_DIR, logStartupWarnings } from './config/env.js';
+import { installGlobalProxySupport } from './config/proxy.js';
 import { installFileLogger } from './logging/file-logger.js';
 import { createAgentRouter } from './routes/agent.js';
 import { createWorkspaceRouter } from './routes/workspace.js';
@@ -29,23 +30,26 @@ export function createApp() {
 
 export function startServer() {
   installFileLogger();
+  installGlobalProxySupport();
   logStartupWarnings();
   const app = createApp();
 
   return app.listen(PORT, () => {
-  console.log(`\nAgent Sandbox API running on port ${PORT}`);
-  console.log(`  Profile:   ${RUNTIME_PROFILE}`);
-  console.log(`  Workspace: ${WORKSPACE_DIR}`);
-  console.log(`\nCustomize: harness-config/pi-agent-home/, harness-config/initial-workspace/.pi/, and harness-config/docker.ts`);
-  console.log(`\nEndpoints:`);
-  console.log(`  GET  /health`);
-  console.log(`  POST /agent/query            { sandboxId, prompt, systemPrompt?, sessionId?, metadata? }`);
-  console.log(`  POST /agent/interrupt         { sandboxId }`);
-  console.log(`  GET  /agent/status`);
-  console.log(`  GET  /agent/events/:sandboxId`);
-  console.log(`  POST /workspace/files/sync`);
-  console.log(`  POST /workspace/files/import`);
-  console.log(`  DELETE /workspace/sandbox/:sandboxId`);
+    console.log(`\nAgent Sandbox API running on port ${PORT}`);
+    console.log(`  Profile:   ${RUNTIME_PROFILE}`);
+    console.log(`  Workspace: ${WORKSPACE_DIR}`);
+    console.log(
+      '\nCustomize: harness-config/pi-agent-home/, harness-config/initial-workspace/.pi/, and harness-config/docker.ts',
+    );
+    console.log('\nEndpoints:');
+    console.log('  GET  /health');
+    console.log('  POST /agent/query            { sandboxId, prompt, systemPrompt?, sessionId?, metadata? }');
+    console.log('  POST /agent/interrupt         { sandboxId }');
+    console.log('  GET  /agent/status');
+    console.log('  GET  /agent/events/:sandboxId');
+    console.log('  POST /workspace/files/sync');
+    console.log('  POST /workspace/files/import');
+    console.log('  DELETE /workspace/sandbox/:sandboxId');
   });
 }
 

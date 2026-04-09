@@ -72,7 +72,11 @@ The main pi-specific harness surface is:
 - pi auth/config defaults to `PI_HOME`
 - local default `PI_HOME` is `./harness-config/pi-agent-home`
 - Docker default `PI_HOME` is `/home/node/.pi/agent`
-- local auth is not copied implicitly from `~/.pi/agent`; use normal pi auth files or provider env vars
+- local auth is not copied implicitly from `~/.pi/agent`
+- Docker startup seeds `PI_HOME/auth.json` from a mounted host auth file when available
+- if no auth file is mounted, Docker startup can write an OpenAI API key into `PI_HOME/auth.json`
+- proxy env vars are installed into Node's global HTTP dispatcher so SDK traffic respects managed egress
+- runtime CA bundle env vars (`NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE`, `SSL_CERT_FILE`) are supported for proxy trust
 - resume support uses pi's own persisted session listing plus `sessionId` matching
 
 ## Native Pi Layout
@@ -125,6 +129,8 @@ For multi-file extensions, use `extensions/my-extension/index.ts`. If the extens
 npm run typecheck
 npm test
 npm run harness:materialize
+npm run image:print
+npm run image:release
 ```
 
 ## Current State
@@ -133,3 +139,4 @@ npm run harness:materialize
 - typecheck passes
 - the top-level docs and machine config are now pi-oriented
 - resume now follows pi's own persisted session model more directly
+- Docker startup now supports auth seeding and managed-proxy CA wiring
