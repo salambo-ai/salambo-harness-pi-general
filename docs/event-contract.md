@@ -30,4 +30,4 @@ Identifier split:
 - `sandboxId` = outer sandbox/platform run
 - `sessionId` = inner pi session when known
 
-See [sandbox-event-shapes.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/sandbox-event-shapes.md) for the current payload shapes.
+See [pi-sandbox-event-contract.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/pi-sandbox-event-contract.md) for the raw sandbox event contract and the platform-adaptation boundary.
