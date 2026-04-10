@@ -5,6 +5,7 @@ import {
   S2_BASIN,
   S2_ENABLED,
 } from '../config/env.js';
+import { encryptS2EventPayload } from './s2-event-encryption.js';
 
 type JsonEventPayload = Record<string, unknown>;
 
@@ -31,7 +32,13 @@ function getS2Basin() {
 type S2Stream = ReturnType<ReturnType<typeof getS2Basin>['stream']>;
 
 export type EventSink =
-  | { kind: 's2'; sandboxId: string; streamName: string; stream: S2Stream }
+  | {
+      kind: 's2';
+      sandboxId: string;
+      streamName: string;
+      stream: S2Stream;
+      s2EventEncryptionKey?: string;
+    }
   | { kind: 'local'; sandboxId: string; streamName: string };
 
 const localEventSessions = new Map<string, LocalEventSession>();
@@ -81,12 +88,22 @@ export function getLocalEvents(sandboxId: string, limit: number) {
   };
 }
 
-export function createEventSink(sandboxId: string, streamName: string): EventSink {
+export function createEventSink(
+  sandboxId: string,
+  streamName: string,
+  s2EventEncryptionKey?: string,
+): EventSink {
   if (!S2_ENABLED) {
     return { kind: 'local', sandboxId, streamName };
   }
   const basin = getS2Basin();
-  return { kind: 's2', sandboxId, streamName, stream: basin.stream(streamName) };
+  return {
+    kind: 's2',
+    sandboxId,
+    streamName,
+    stream: basin.stream(streamName),
+    s2EventEncryptionKey,
+  };
 }
 
 export async function sendSessionEventToStream(params: {
@@ -128,10 +145,22 @@ export async function appendJsonEvent(
   const retryDelay = 1000 * Math.pow(2, retryCount);
 
   try {
-    const content = JSON.stringify(payload);
+    const content =
+      stream.kind === 's2'
+        ? JSON.stringify(
+            buildEncryptedS2Payload(
+              payload,
+              stream.s2EventEncryptionKey,
+              stream.streamName,
+            ),
+          )
+        : JSON.stringify(payload);
     const record = AppendRecord.make(content, {
       'content-type': 'application/json',
-      'event-type': String(payload.type ?? 'event'),
+      'event-type':
+        stream.kind === 's2'
+          ? 'salambo.encrypted_event'
+          : String(payload.type ?? 'event'),
     });
 
     if (retryCount > 0) {
@@ -167,4 +196,20 @@ export function sanitizePayload<T>(value: T): T {
   } catch {
     return value;
   }
+}
+
+function buildEncryptedS2Payload(
+  payload: Record<string, unknown>,
+  s2EventEncryptionKey: string | undefined,
+  streamName: string,
+) {
+  if (!s2EventEncryptionKey) {
+    throw new Error('S2_EVENT_ENCRYPTION_KEY is required for S2 event writes');
+  }
+
+  return encryptS2EventPayload({
+    payload,
+    key: s2EventEncryptionKey,
+    streamName,
+  });
 }

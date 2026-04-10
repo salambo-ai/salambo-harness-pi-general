@@ -1,6 +1,6 @@
 {
   "name": "salambo-sandbox-pi-sdk",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Dockerized sandbox template for @mariozechner/pi-coding-agent with the Salambo HTTP API",
   "type": "module",
   "main": "dist/src/server.js",

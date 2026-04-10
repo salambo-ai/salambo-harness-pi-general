@@ -63,7 +63,14 @@ export function createAgentRouter(deps: AgentRouterDeps = defaultDeps) {
   });
 
   router.post('/agent/query', async (req: Request, res: Response) => {
-    const { prompt, sandboxId, sessionId, systemPrompt, metadata } = req.body ?? {};
+    const {
+      prompt,
+      sandboxId,
+      sessionId,
+      systemPrompt,
+      metadata,
+      s2EventEncryptionKey,
+    } = req.body ?? {};
     const agentToken = typeof req.headers.authorization === 'string' ? req.headers.authorization : undefined;
 
     if (!prompt || typeof prompt !== 'string') {
@@ -114,6 +121,10 @@ export function createAgentRouter(deps: AgentRouterDeps = defaultDeps) {
         prompt,
         systemPrompt,
         metadata,
+        s2EventEncryptionKey:
+          typeof s2EventEncryptionKey === 'string' && s2EventEncryptionKey.length > 0
+            ? s2EventEncryptionKey
+            : undefined,
         abortController,
         streamName,
         isResuming,

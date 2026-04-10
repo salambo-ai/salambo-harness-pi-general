@@ -15,6 +15,7 @@ export type RunSandboxOptions = {
   prompt: string;
   systemPrompt?: string;
   metadata?: Record<string, unknown>;
+  s2EventEncryptionKey?: string;
   abortController: AbortController;
   streamName: string;
   isResuming: boolean;
@@ -136,7 +137,11 @@ export async function runAgentSandbox(
   deps: AgentRunnerDeps = defaultDeps,
 ) {
   const startTime = Date.now();
-  const stream = deps.createEventSink(options.sandboxId, options.streamName);
+  const stream = deps.createEventSink(
+    options.sandboxId,
+    options.streamName,
+    options.s2EventEncryptionKey,
+  );
   const ts = () => new Date().toISOString();
   let sessionId: string | undefined = options.sessionId;
   let messageCount = 0;
