@@ -6,7 +6,7 @@ All notable changes to this template should be documented here.
 
 ### Added
 
-- Created a pi-based sibling template at `salambo-sandbox-pi-sdk`.
+- Created a Pi-based general harness template.
 - Added a pi-backed sandbox runner and session registry adapter.
 - Added project-local `PI_HOME` bootstrap and default pi settings/system prompt files.
 

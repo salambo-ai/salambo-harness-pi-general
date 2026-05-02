@@ -1,6 +1,6 @@
-# Salambo Sandbox Pi SDK
+# Salambo Harness Pi General
 
-Dockerized sandbox template for `@mariozechner/pi-coding-agent` that preserves the current Salambo HTTP API, workspace semantics, and event contract.
+General-purpose Pi agent harness template for `@mariozechner/pi-coding-agent` that preserves the current Salambo HTTP API, workspace semantics, and event contract.
 
 ## Quickstart
 
@@ -45,7 +45,7 @@ Event families stay the same:
 
 ## Repo Shape
 
-This repo keeps the same split as the other Salambo templates:
+This repo keeps the same split as other Salambo harness templates:
 
 - fixed platform layer: `src/routes`, `src/core`, `src/platform`
 - customizable harness layer: `harness-config/`, Docker/runtime files, `.env`

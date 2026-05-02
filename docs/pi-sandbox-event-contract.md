@@ -13,7 +13,7 @@ So:
 - sandbox repo owns `sandbox.run.*` and `session.event`
 - platform/app owns `response.*`, `salambo:agent.*`, `salambo:raw.pi.event`, and `[DONE]`
 
-For the full PI inner event catalog, see [pi-agent-event-catalog.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/pi-agent-event-catalog.md).
+For the full PI inner event catalog, see [pi-agent-event-catalog.md](pi-agent-event-catalog.md).
 
 The platform-side SSE mapping belongs in the platform/app repo, not this template repo.
 
@@ -231,7 +231,7 @@ The sandbox forwards PI `AgentSession.subscribe()` events as-is. Common top-leve
 - `done`
 - `error`
 
-See [pi-agent-event-catalog.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/pi-agent-event-catalog.md) for the complete installed-package catalog.
+See [pi-agent-event-catalog.md](pi-agent-event-catalog.md) for the complete installed-package catalog.
 
 ## Ordering Guarantees
 

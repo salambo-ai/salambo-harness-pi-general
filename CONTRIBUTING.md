@@ -34,7 +34,7 @@ docker build .
 - HTTP contract
 - S2 event contract
 
-See [docs/testing.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/testing.md) and [docs/event-contract.md](/C:/Users/nicol/WebstormProjects/salambo-sandbox/salambo-sandbox-pi-sdk/docs/event-contract.md).
+See [docs/testing.md](docs/testing.md) and [docs/event-contract.md](docs/event-contract.md).
 
 ## What Should Stay Flexible
 

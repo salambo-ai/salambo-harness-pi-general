@@ -1,7 +1,7 @@
 {
-  "name": "salambo-sandbox-pi-sdk",
+  "name": "salambo-harness-pi-general",
   "version": "2.0.5",
-  "description": "Dockerized sandbox template for @mariozechner/pi-coding-agent with the Salambo HTTP API",
+  "description": "General-purpose Pi agent harness template with the Salambo HTTP API",
   "type": "module",
   "main": "dist/src/server.js",
   "scripts": {
@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit",
     "harness:validate": "tsx -e \"import { getImageConfig } from './src/platform/load-image-config'; getImageConfig(); console.log('Harness config OK');\"",
     "harness:materialize": "node --import tsx scripts/materialize-image-config.mjs",
-    "docker:build": "docker build -t salambo-sandbox-pi-sdk .",
-    "docker:run": "docker run -p 3000:3000 salambo-sandbox-pi-sdk",
+    "docker:build": "docker build -t salambo-harness-pi-general .",
+    "docker:run": "docker run -p 3000:3000 salambo-harness-pi-general",
     "image:build": "node scripts/docker-image.mjs build",
     "image:push": "node scripts/docker-image.mjs push",
     "image:release": "node scripts/docker-image.mjs release",

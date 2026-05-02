@@ -1,5 +1,5 @@
 export default {
-  repository: 'ghcr.io/niosgotgrit/salambo-sandbox-pi-sdk',
+  repository: 'ghcr.io/salambo-ai/salambo-harness-pi-general',
   defaultPlatform: '',
   pushLatest: false,
   provenance: false,

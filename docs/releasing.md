@@ -11,7 +11,7 @@ Edit:
 Set the image repository, for example:
 
 ```js
-repository: 'ghcr.io/niosgotgrit/salambo-sandbox-pi-sdk'
+repository: 'ghcr.io/salambo-ai/salambo-harness-pi-general'
 ```
 
 Use lowercase image names for registries such as GHCR.
