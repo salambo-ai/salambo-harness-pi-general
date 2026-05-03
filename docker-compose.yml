@@ -1,5 +1,5 @@
 services:
-  agent-sandbox:
+  harness:
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,13 +19,15 @@ services:
       - S2_BASIN=${S2_BASIN}
       - S2_STREAM_PREFIX=${S2_STREAM_PREFIX:-agent-session}
     volumes:
-      - workspace-data:/workspace
-      - type: bind
-        source: ${HOME}/.pi/agent/auth.json
-        target: /tmp/pi-host-auth.json
-        read_only: true
-        bind:
-          create_host_path: false
+      - ./workspace:/workspace
+      # Optional: uncomment to seed container auth from a host Pi auth file.
+      # Leave commented for first-time setup; OPENAI_API_KEY can seed auth instead.
+      # - type: bind
+      #   source: ${HOME}/.pi/agent/auth.json
+      #   target: /tmp/pi-host-auth.json
+      #   read_only: true
+      #   bind:
+      #     create_host_path: false
       # Mount for development (comment out in production)
       # - ./src:/app/src
     restart: unless-stopped
@@ -45,7 +47,3 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
-
-volumes:
-  workspace-data:
-    driver: local

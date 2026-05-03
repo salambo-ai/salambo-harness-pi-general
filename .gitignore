@@ -11,6 +11,8 @@ coverage/
 !.codex-home/config.toml
 harness-config/codex-home/*
 !harness-config/codex-home/config.toml
+workspace/*
+!workspace/.gitkeep
 
 # IDE
 .idea/

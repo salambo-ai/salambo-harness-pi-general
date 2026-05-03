@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/badlogic/pi-mono/main/packages/coding-agent/settings-schema.json",
   "model": {
     "provider": "openai",
-    "model": "gpt-5.2",
+    "model": "gpt-5.2"
   },
   "tools": [
     "read",

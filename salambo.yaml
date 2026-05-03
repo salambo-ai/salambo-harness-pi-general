@@ -1,0 +1,50 @@
+version: 1
+name: salambo-harness-pi-general
+runtime: pi
+
+image:
+  repository: ghcr.io/salambo-ai/salambo-harness-pi-general
+  tag: git-sha
+  context: .
+  dockerfile: Dockerfile
+  platform: linux/amd64
+  buildArgs: {}
+
+snapshot:
+  name: salambo-harness-pi-general
+  entrypoint: /app/start.sh
+  size: s
+
+agent:
+  name: Salambo Pi Harness
+  slug: salambo-harness-pi-general
+  description: General-purpose Pi agent harness.
+  icon: 🤖
+  isActive: true
+
+runtimeConfig:
+  egressPolicyMode: restricted
+  egressAllowlist:
+    - api.openai.com:443
+  otlpEndpointOverride: null
+  otelIncludeContentOverride: null
+
+env:
+  MODEL:
+    value: gpt-5.2
+    description: Default model mirrored from harness-config/pi-agent-home/settings.json.
+
+secrets:
+  OPENAI_API_KEY:
+    fromEnv: OPENAI_API_KEY
+    description: OpenAI provider key.
+    allowedHosts:
+      - api.openai.com:443
+
+local:
+  mode: docker
+  port: 3000
+  composeFile: docker-compose.yml
+  composeService: harness
+  workspaceDir: ./workspace
+  piHome: ./harness-config/pi-agent-home
