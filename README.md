@@ -1,13 +1,21 @@
 # Salambo Harness Pi General
 
-General-purpose Pi agent harness template for `@mariozechner/pi-coding-agent` that preserves the current Salambo HTTP API, workspace semantics, and event contract.
+General-purpose Pi agent harness template for Salambo. It packages `@mariozechner/pi-coding-agent` behind Salambo's stable sandbox HTTP contract and is designed to be deployed with the Salambo CLI from `salambo.yaml`.
 
 ## Quickstart
 
 ```bash
 cp .env.example .env
 npm install
-npm run dev
+npm run typecheck
+npm test
+```
+
+Run locally with the Salambo CLI from the app monorepo:
+
+```bash
+node /path/to/salambo_app/packages/cli/build/index.js doctor
+node /path/to/salambo_app/packages/cli/build/index.js dev
 ```
 
 Health check:
@@ -15,6 +23,41 @@ Health check:
 ```bash
 curl http://localhost:3000/health
 ```
+
+Open Pi inside the running local harness container:
+
+```bash
+node /path/to/salambo_app/packages/cli/build/index.js pi
+```
+
+`salambo pi` starts Pi from `/workspace`, which is mounted from local `./workspace`.
+
+## Deployment
+
+This repo includes `salambo.yaml`. It is deployment configuration only:
+
+- image build/push settings
+- snapshot settings
+- Salambo agent identity/active flag
+- runtime egress/telemetry config
+- deployed env vars and secret references
+- local Docker/Pi wiring
+
+Agent behavior and instructions do **not** live in `salambo.yaml`. Customize behavior through Pi-native files under `harness-config/` and workspace `.pi/` overrides.
+
+Deploy with:
+
+```bash
+node /path/to/salambo_app/packages/cli/build/index.js auth set \
+  --env-var SALAMBO_API_KEY \
+  --api-url "$SALAMBO_BASE_URL" \
+  --profile default
+
+node /path/to/salambo_app/packages/cli/build/index.js deploy --profile default
+node /path/to/salambo_app/packages/cli/build/index.js smoke "Say hello" --profile default
+```
+
+`salambo deploy` builds and pushes the GHCR image, creates a new Pi snapshot named `<snapshot.name>-<git-sha>` by default, finds/creates the agent by slug, upserts env/secrets, attaches runtime config to the resolved snapshot, and sets active state from `agent.isActive`.
 
 ## Stable Contract
 
@@ -29,12 +72,12 @@ These surfaces stay compatible with the current platform:
 - `POST /workspace/files/import`
 - `DELETE /workspace/sandbox/:sandboxId`
 
-Workspace semantics stay the same:
+Workspace paths stay stable:
 
 - `/workspace/work`
 - `/workspace/outputs`
 
-Event families stay the same:
+Event families stay stable:
 
 - `sandbox.run.init`
 - `sandbox.run.ready`
@@ -45,12 +88,22 @@ Event families stay the same:
 
 ## Repo Shape
 
-This repo keeps the same split as other Salambo harness templates:
+Fixed platform layer:
 
-- fixed platform layer: `src/routes`, `src/core`, `src/platform`
-- customizable harness layer: `harness-config/`, Docker/runtime files, `.env`
+- `src/routes`
+- `src/core`
+- `src/platform`
 
-The main pi-specific harness surface is:
+Customizable harness layer:
+
+- `harness-config/`
+- `Dockerfile`
+- `docker-compose.yml`
+- `salambo.yaml`
+- `.env`
+- `workspace/`
+
+Pi-specific customization surfaces:
 
 - `harness-config/pi-agent-home/settings.json`
 - `harness-config/pi-agent-home/SYSTEM.md`
@@ -59,39 +112,45 @@ The main pi-specific harness surface is:
 - `harness-config/pi-agent-home/prompts/`
 - `harness-config/pi-agent-home/themes/`
 - `harness-config/initial-workspace/.pi/`
+- `workspace/.pi/`
 - `harness-config/docker.ts`
 - `harness-config/image.config.mjs`
 
-## Runtime Notes
+## Local vs deployed runtime
 
-- the sandbox runner in `src/core/agent-runner.ts` uses `@mariozechner/pi-coding-agent`
-- the sandbox app hardcodes only the minimal app-level contract it owns
-- the repo seeds `PI_HOME` from `harness-config/pi-agent-home/`
-- pi runtime state then lives in the actual runtime `PI_HOME`
-- pi project overrides live in `/workspace/.pi/`
-- pi auth/config defaults to `PI_HOME`
-- local default `PI_HOME` is `./harness-config/pi-agent-home`
-- Docker default `PI_HOME` is `/home/node/.pi/agent`
-- local auth is not copied implicitly from `~/.pi/agent`
-- Docker startup seeds `PI_HOME/auth.json` from a mounted host auth file when available
-- if no auth file is mounted, Docker startup can write an OpenAI API key into `PI_HOME/auth.json`
-- proxy env vars are installed into Node's global HTTP dispatcher so SDK traffic respects managed egress
-- runtime CA bundle env vars (`NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE`, `SSL_CERT_FILE`) are supported for proxy trust
-- resume support uses pi's own persisted session listing plus `sessionId` matching
+Local Docker mode validates the harness app, image tools, and Pi behavior. It does not fully emulate Salambo production runtime concerns such as S2 event streaming, managed file gateway, billing gates, snapshot launch, or platform-managed runtime secrets.
+
+Use:
+
+```bash
+salambo pi
+```
+
+for local behavior testing.
+
+Use:
+
+```bash
+salambo deploy
+salambo smoke
+```
+
+for deployed API/runtime validation.
 
 ## Native Pi Layout
 
-This template follows pi's native two-scope model:
+This template follows Pi's native two-scope model:
 
 - template defaults in `PI_HOME`
 - project overrides in workspace `.pi/`
 
 In this repo that means:
 
-- `harness-config/pi-agent-home/` seeds template-level pi config
-- `harness-config/initial-workspace/.pi/` seeds project-level pi overrides
+- `harness-config/pi-agent-home/` seeds template-level Pi config
+- `harness-config/initial-workspace/.pi/` seeds project-level Pi overrides copied into images
+- `workspace/.pi/` is available for local project overrides during Docker development
 
-Use pi's normal directories instead of inventing another layer:
+Use Pi's normal directories instead of inventing another layer:
 
 - `extensions/`
 - `skills/`
@@ -100,18 +159,16 @@ Use pi's normal directories instead of inventing another layer:
 - `settings.json`
 - `SYSTEM.md`
 
-Use `settings.json` path arrays or packages only when you need extra paths or shareable bundles.
-
 ## Adding Pi Resources
 
-Use pi's native resource layout directly.
+Use Pi's native resource layout directly.
 
 - bundled template extensions go in `harness-config/pi-agent-home/extensions/`
 - bundled template skills go in `harness-config/pi-agent-home/skills/`
 - bundled template prompts go in `harness-config/pi-agent-home/prompts/`
 - bundled template themes go in `harness-config/pi-agent-home/themes/`
-- project-local resources inside a synced workspace go in `harness-config/initial-workspace/.pi/`
-- `settings.json` can also point to extra extension paths if you want to use pi's own `extensions` array
+- project-local resources inside a synced workspace go in `workspace/.pi/` for local dev or `harness-config/initial-workspace/.pi/` for image defaults
+- `settings.json` can also point to extra extension paths if you want to use Pi's own `extensions` array
 
 Each extension is a TypeScript module that exports:
 
@@ -121,22 +178,25 @@ export default function (pi: ExtensionAPI) {
 }
 ```
 
-For multi-file extensions, use `extensions/my-extension/index.ts`. If the extension has its own dependencies, give that extension directory its own `package.json`, exactly the way pi documents it.
+For multi-file extensions, use `extensions/my-extension/index.ts`. If the extension has its own dependencies, give that extension directory its own `package.json`, exactly the way Pi documents it.
 
 ## Commands
 
 ```bash
 npm run typecheck
 npm test
+npm run harness:validate
 npm run harness:materialize
 npm run image:print
 npm run image:release
 ```
 
-## Current State
+Docker Compose local mode:
 
-- local tests pass
-- typecheck passes
-- the top-level docs and machine config are now pi-oriented
-- resume now follows pi's own persisted session model more directly
-- Docker startup now supports auth seeding and managed-proxy CA wiring
+```bash
+docker compose up --build
+curl http://localhost:3000/health
+docker compose exec harness bash -lc 'cd /workspace && pi'
+```
+
+For first-time setup, the compose file does not require a host `~/.pi/agent/auth.json`. `OPENAI_API_KEY` can seed container auth on startup. If you want to reuse host Pi auth instead, uncomment the optional auth bind mount in `docker-compose.yml`.
