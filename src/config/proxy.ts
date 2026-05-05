@@ -9,6 +9,7 @@ type ProxyRuntime = {
     requestTls?: {
       ca?: string;
     };
+    noProxy?: string;
   }) => unknown;
   setGlobalDispatcher: (dispatcher: any) => void;
   readFileSync: (path: string, encoding: BufferEncoding) => string;
@@ -47,6 +48,7 @@ export function installGlobalProxySupport(options?: {
 
   runtime.setGlobalDispatcher(
     new runtime.EnvHttpProxyAgent({
+      noProxy: env.NO_PROXY ?? env.no_proxy,
       proxyTls: trustBundle ? { ca: trustBundle } : undefined,
       requestTls: trustBundle ? { ca: trustBundle } : undefined,
     }),
