@@ -152,6 +152,40 @@ test('installGlobalProxySupport passes uppercase NO_PROXY explicitly to undici',
   });
 });
 
+
+test('installGlobalProxySupport merges lowercase no_proxy before uppercase NO_PROXY', () => {
+  let constructorOptions: unknown = null;
+
+  installGlobalProxySupport({
+    env: {
+      HTTPS_PROXY: 'https://proxy.internal:8443',
+      NO_PROXY: 'localhost,127.0.0.1,::1,otel-collector.app.daytona.io',
+      no_proxy: 'aws.s2.dev,salambo-demo.b.aws.s2.dev',
+    },
+    runtime: {
+      EnvHttpProxyAgent: class FakeProxyAgent {
+        constructor(options?: unknown) {
+          constructorOptions = options ?? null;
+        }
+      },
+      setGlobalDispatcher() {},
+      readFileSync() {
+        throw new Error('should not be called');
+      },
+    },
+    logger: {
+      info() {},
+    },
+  });
+
+  assert.deepEqual(constructorOptions, {
+    noProxy: 'aws.s2.dev,salambo-demo.b.aws.s2.dev,localhost,127.0.0.1,::1,otel-collector.app.daytona.io',
+    proxyTls: undefined,
+    requestTls: undefined,
+  });
+});
+
+
 test('installGlobalProxySupport is idempotent', () => {
   let calls = 0;
 

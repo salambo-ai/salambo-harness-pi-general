@@ -48,7 +48,7 @@ export function installGlobalProxySupport(options?: {
 
   runtime.setGlobalDispatcher(
     new runtime.EnvHttpProxyAgent({
-      noProxy: env.NO_PROXY ?? env.no_proxy,
+      noProxy: mergeNoProxy(env.no_proxy, env.NO_PROXY),
       proxyTls: trustBundle ? { ca: trustBundle } : undefined,
       requestTls: trustBundle ? { ca: trustBundle } : undefined,
     }),
@@ -64,6 +64,19 @@ export function installGlobalProxySupport(options?: {
 
 export function resetProxySupportForTests() {
   installed = false;
+}
+
+function mergeNoProxy(primary: string | undefined, secondary: string | undefined) {
+  const hosts = [primary, secondary]
+    .flatMap((value) => (value ?? '').split(','))
+    .map((host) => host.trim())
+    .filter(Boolean);
+
+  if (hosts.length === 0) {
+    return undefined;
+  }
+
+  return [...new Set(hosts)].join(',');
 }
 
 function resolveTrustBundlePath(env: NodeJS.ProcessEnv) {
