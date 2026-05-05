@@ -73,6 +73,7 @@ test('installGlobalProxySupport installs a global dispatcher from proxy env', ()
     'env-proxy-agent',
   );
   assert.deepEqual(constructorOptions, {
+    noProxy: undefined,
     proxyTls: undefined,
     requestTls: undefined,
   });
@@ -110,12 +111,44 @@ test('installGlobalProxySupport wires trust bundle into proxy and request TLS', 
 
   assert.ok(dispatcher);
   assert.deepEqual(constructorOptions, {
+    noProxy: undefined,
     proxyTls: {
       ca: 'CERTIFICATE_DATA',
     },
     requestTls: {
       ca: 'CERTIFICATE_DATA',
     },
+  });
+});
+
+test('installGlobalProxySupport passes uppercase NO_PROXY explicitly to undici', () => {
+  let constructorOptions: unknown = null;
+
+  installGlobalProxySupport({
+    env: {
+      HTTPS_PROXY: 'https://proxy.internal:8443',
+      NO_PROXY: 'localhost,aws.s2.dev,salambo-demo.b.aws.s2.dev',
+    },
+    runtime: {
+      EnvHttpProxyAgent: class FakeProxyAgent {
+        constructor(options?: unknown) {
+          constructorOptions = options ?? null;
+        }
+      },
+      setGlobalDispatcher() {},
+      readFileSync() {
+        throw new Error('should not be called');
+      },
+    },
+    logger: {
+      info() {},
+    },
+  });
+
+  assert.deepEqual(constructorOptions, {
+    noProxy: 'localhost,aws.s2.dev,salambo-demo.b.aws.s2.dev',
+    proxyTls: undefined,
+    requestTls: undefined,
   });
 });
 
