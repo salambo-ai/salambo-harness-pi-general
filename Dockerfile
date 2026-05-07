@@ -44,8 +44,9 @@ RUN if grep -Eq '\S' /tmp/image-config/requirements.txt; then \
       pip install --no-cache-dir -r /tmp/image-config/requirements.txt; \
     fi
 
-# Copy initial workspace files
+# Copy initial workspace files and agent resources
 COPY --chown=node:node harness-config/initial-workspace/ /workspace/
+COPY --chown=node:node agent /workspace/agent
 
 # Copy startup script
 COPY start.sh /app/start.sh
