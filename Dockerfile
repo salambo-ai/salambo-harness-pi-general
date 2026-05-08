@@ -51,6 +51,7 @@ COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
 COPY --chown=node:node agent/prompts /workspace/.salambo/agent/prompts
 RUN mkdir -p /workspace/.salambo/extensions
 COPY --chown=node:node .salambo/extensions /workspace/.salambo/extensions
+RUN chown -R node:node /workspace/.salambo
 
 # Copy startup script
 COPY start.sh /app/start.sh
