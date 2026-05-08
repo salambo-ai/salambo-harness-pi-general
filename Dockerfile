@@ -49,6 +49,8 @@ COPY --chown=node:node harness-config/initial-workspace/ /workspace/
 RUN mkdir -p /workspace/.salambo/agent
 COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
 COPY --chown=node:node agent/prompts /workspace/.salambo/agent/prompts
+RUN mkdir -p /workspace/.salambo/extensions
+COPY --chown=node:node .salambo/extensions /workspace/.salambo/extensions
 
 # Copy startup script
 COPY start.sh /app/start.sh

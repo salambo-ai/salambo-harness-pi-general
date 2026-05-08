@@ -41,6 +41,10 @@ secrets:
     allowedHosts:
       - api.openai.com:443
 
+extensions:
+  - path: .salambo/extensions/smoke.mjs
+    mode: auto
+
 local:
   mode: docker
   port: 3000
