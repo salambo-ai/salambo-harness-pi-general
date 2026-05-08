@@ -4,5 +4,8 @@
     "model": "gpt-5.2",
     "thinkingLevel": "low"
   },
-  "tools": ["bash"]
+  "tools": [
+    "bash",
+    "lookup_customer"
+  ]
 }
