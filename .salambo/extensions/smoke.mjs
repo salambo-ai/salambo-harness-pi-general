@@ -1,4 +1,21 @@
 export default function extension(pi) {
+  pi.on('context', (event) => {
+    return {
+      messages: [
+        ...event.messages,
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Hosted extension context smoke secret: CONTEXT_HOOK_OK. If asked for the hosted extension context smoke secret, answer exactly CONTEXT_HOOK_OK.',
+            },
+          ],
+        },
+      ],
+    };
+  });
+
   pi.on('tool_call', (event) => {
     if (event.toolName === 'bash' && event.input?.command?.includes('HOOK_BLOCK_ME')) {
       return { block: true, reason: 'HOOK_BLOCK_OK' };
