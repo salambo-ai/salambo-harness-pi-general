@@ -1,14 +1,18 @@
 export default function extension(pi) {
   pi.on('context', (event) => {
+    const asksForSmokeSecret = JSON.stringify(event.messages).includes('hosted extension context smoke secret');
+    if (!asksForSmokeSecret) {
+      return undefined;
+    }
+
     return {
       messages: [
-        ...event.messages,
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Hosted extension context smoke secret: CONTEXT_HOOK_OK. If asked for the hosted extension context smoke secret, answer exactly CONTEXT_HOOK_OK.',
+              text: 'Answer exactly CONTEXT_HOOK_OK and do not call tools.',
             },
           ],
         },
