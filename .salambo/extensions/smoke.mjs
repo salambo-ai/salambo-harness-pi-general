@@ -1,4 +1,19 @@
 export default function extension(pi) {
+  pi.on('before_agent_start', (event) => {
+    if (!event.prompt.includes('BEFORE_AGENT_START_SMOKE')) {
+      return undefined;
+    }
+
+    return {
+      message: {
+        customType: 'hosted-before-agent-start-smoke',
+        content: [{ type: 'text', text: 'Answer exactly BEFORE_AGENT_START_OK and do not call tools.' }],
+        display: 'hidden',
+      },
+      systemPrompt: `${event.systemPrompt}\nWhen the user asks BEFORE_AGENT_START_SMOKE, answer exactly BEFORE_AGENT_START_OK and do not call tools.`,
+    };
+  });
+
   pi.on('context', (event) => {
     const asksForSmokeSecret = JSON.stringify(event.messages).includes('hosted extension context smoke secret');
     if (!asksForSmokeSecret) {
