@@ -20,6 +20,19 @@ export default function extension(pi) {
     };
   });
 
+  pi.on('before_provider_request', (event) => {
+    const encoded = JSON.stringify(event.payload);
+    if (!encoded.includes('BEFORE_PROVIDER_REQUEST_SMOKE')) {
+      return undefined;
+    }
+
+    return replaceStringValues(
+      event.payload,
+      'BEFORE_PROVIDER_REQUEST_SMOKE',
+      'Answer exactly PROVIDER_REQUEST_HOOK_OK and do not call tools.',
+    );
+  });
+
   pi.on('tool_call', (event) => {
     if (event.toolName === 'bash' && event.input?.command?.includes('HOOK_BLOCK_ME')) {
       return { block: true, reason: 'HOOK_BLOCK_OK' };
@@ -83,4 +96,22 @@ export default function extension(pi) {
       };
     },
   });
+}
+
+function replaceStringValues(value, search, replacement) {
+  if (typeof value === 'string') {
+    return value.includes(search) ? replacement : value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => replaceStringValues(item, search, replacement));
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, replaceStringValues(item, search, replacement)]),
+    );
+  }
+
+  return value;
 }
