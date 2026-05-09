@@ -1,4 +1,12 @@
 export default function extension(pi) {
+  pi.on('tool_call', (event) => {
+    if (event.toolName === 'bash' && event.input?.command?.includes('HOOK_BLOCK_ME')) {
+      return { block: true, reason: 'HOOK_BLOCK_OK' };
+    }
+
+    return { block: false };
+  });
+
   pi.registerTool({
     name: 'lookup_customer',
     label: 'Lookup Customer',
