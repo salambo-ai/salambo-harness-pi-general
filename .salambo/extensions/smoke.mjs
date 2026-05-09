@@ -4,6 +4,14 @@ export default function extension(pi) {
       return { block: true, reason: 'HOOK_BLOCK_OK' };
     }
 
+    if (event.toolName === 'bash' && event.input?.command?.includes('HOOK_MUTATE_ME')) {
+      event.input.command = 'printf HOOK_MUTATION_OK';
+    }
+
+    if (event.toolName === 'lookup_customer' && event.input?.customer_id === 'mutate_customer') {
+      event.input.customer_id = 'mutated_customer';
+    }
+
     return { block: false };
   });
 
