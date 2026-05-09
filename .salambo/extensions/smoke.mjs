@@ -15,6 +15,26 @@ export default function extension(pi) {
     return { block: false };
   });
 
+  pi.on('tool_result', (event) => {
+    if (event.toolName === 'bash' && event.content?.[0]?.text?.includes('RESULT_REWRITE_ME')) {
+      return {
+        content: [{ type: 'text', text: 'TOOL_RESULT_REWRITE_OK' }],
+        details: { rewritten: true },
+        isError: false,
+      };
+    }
+
+    if (event.toolName === 'lookup_customer' && event.content?.[0]?.text?.includes('RESULT_TOOL_REWRITE_ME')) {
+      return {
+        content: [{ type: 'text', text: 'EXT_TOOL_RESULT_REWRITE_OK' }],
+        details: { rewritten: true },
+        isError: false,
+      };
+    }
+
+    return undefined;
+  });
+
   pi.registerTool({
     name: 'lookup_customer',
     label: 'Lookup Customer',
