@@ -6,6 +6,7 @@
   },
   "tools": [
     "bash",
-    "lookup_customer"
+    "lookup_customer",
+    "provider_response_observed"
   ]
 }
