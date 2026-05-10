@@ -17,8 +17,8 @@ export default function extension(pi) {
   });
 
   pi.on('context', (event) => {
-    const asksForSmokeSecret = JSON.stringify(event.messages).includes('hosted extension context smoke secret');
-    if (!asksForSmokeSecret) {
+    const lastMessageText = readLastUserMessageText(event.messages);
+    if (!lastMessageText.includes('What is the hosted extension context smoke secret?')) {
       return undefined;
     }
 
@@ -141,6 +141,17 @@ export default function extension(pi) {
       };
     },
   });
+}
+
+function readLastUserMessageText(messages) {
+  const lastUserMessage = [...(messages ?? [])].reverse().find((message) => message?.role === 'user');
+  const content = lastUserMessage?.content;
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return '';
+  return content
+    .filter((item) => item?.type === 'text' && typeof item.text === 'string')
+    .map((item) => item.text)
+    .join('\n');
 }
 
 function replaceStringValues(value, search, replacement) {
