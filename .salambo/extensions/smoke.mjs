@@ -1,3 +1,5 @@
+let observedProviderResponse = false;
+
 export default function extension(pi) {
   pi.on('before_agent_start', (event) => {
     if (!event.prompt.includes('BEFORE_AGENT_START_SMOKE')) {
@@ -84,6 +86,12 @@ export default function extension(pi) {
     return undefined;
   });
 
+  pi.on('after_provider_response', (event) => {
+    if (event.status >= 200 && event.status < 300) {
+      observedProviderResponse = true;
+    }
+  });
+
   pi.registerTool({
     name: 'lookup_customer',
     label: 'Lookup Customer',
@@ -108,6 +116,28 @@ export default function extension(pi) {
           },
         ],
         details: params,
+      };
+    },
+  });
+
+  pi.registerTool({
+    name: 'provider_response_observed',
+    label: 'Provider Response Observed',
+    description: 'Return whether the hosted extension observed a provider response.',
+    parameters: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+    async execute() {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: observedProviderResponse ? 'AFTER_PROVIDER_RESPONSE_OK' : 'AFTER_PROVIDER_RESPONSE_MISSING',
+          },
+        ],
+        details: { observedProviderResponse },
       };
     },
   });
