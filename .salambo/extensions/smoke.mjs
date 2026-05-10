@@ -65,7 +65,7 @@ export default function extension(pi) {
   });
 
   pi.on('tool_result', (event) => {
-    if (event.toolName === 'bash' && event.content?.[0]?.text?.includes('RESULT_REWRITE_ME')) {
+    if (event.toolName === 'bash' && event.input?.command === 'printf RESULT_REWRITE_ME') {
       return {
         content: [{ type: 'text', text: 'TOOL_RESULT_REWRITE_OK' }],
         details: { rewritten: true },
