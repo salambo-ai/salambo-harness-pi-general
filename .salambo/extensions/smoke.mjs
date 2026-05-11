@@ -1,7 +1,19 @@
 let observedProviderResponse = false;
 
 export default function extension(pi) {
-  pi.on('before_agent_start', (event) => {
+  pi.on('before_agent_start', async (event) => {
+    if (event.prompt.includes('MODEL_SELECT_SMOKE')) {
+      await pi.setModel({ provider: 'openai', id: 'gpt-5.4-mini', thinkingLevel: 'low' });
+
+      return {
+        message: {
+          customType: 'hosted-model-select-smoke',
+          content: [{ type: 'text', text: 'Answer exactly MODEL_SELECT_OK and do not call tools.' }],
+          display: 'hidden',
+        },
+      };
+    }
+
     if (!event.prompt.includes('BEFORE_AGENT_START_SMOKE')) {
       return undefined;
     }
