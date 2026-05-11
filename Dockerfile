@@ -32,8 +32,16 @@ RUN if grep -Eq '\S' /tmp/image-config/npm-tools.txt; then \
 # Install harness bootstrap script
 RUN sed -i 's/\r$//' /tmp/image-config/bootstrap.sh && chmod +x /tmp/image-config/bootstrap.sh && /tmp/image-config/bootstrap.sh
 
-# Create workspace directory
-RUN mkdir -p /workspace && chown -R node:node /workspace
+# Create workspace and Salambo runtime directories.
+# /workspace is the agent/customer hands area.
+# /opt/salambo and /run/salambo are reserved for Salambo-owned runtime sidecars.
+RUN mkdir -p \
+      /workspace \
+      /opt/salambo/extension-host \
+      /run/salambo/extension-host && \
+    chown -R node:node /workspace /opt/salambo /run/salambo && \
+    chmod 755 /opt/salambo /opt/salambo/extension-host && \
+    chmod 700 /run/salambo /run/salambo/extension-host
 
 # Create isolated Python environment (PEP 668 compliant)
 RUN python3 -m venv /opt/pyenv
