@@ -25,7 +25,7 @@ agent:
 runtimeConfig:
   egressPolicyMode: restricted
   egressAllowlist:
-    - api.openai.com:443
+    - api.openai.com
   otlpEndpointOverride: null
   otelIncludeContentOverride: null
 
@@ -39,7 +39,7 @@ secrets:
     fromEnv: OPENAI_API_KEY
     description: OpenAI provider key.
     allowedHosts:
-      - api.openai.com:443
+      - api.openai.com
 
 extensions:
   - path: .salambo/extensions/smoke.mjs
