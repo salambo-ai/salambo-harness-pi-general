@@ -1,0 +1,50 @@
+# Copy to .github/workflows/deploy.yml and adjust branch/environment names.
+# This workflow uploads source + manifest to Salambo. Salambo owns Depot builds
+# and Daytona snapshot creation server-side.
+
+name: Deploy Salambo Agent
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Salambo CLI
+        run: npm install -g salambo
+
+      - name: Configure Salambo auth
+        run: |
+          salambo auth set \
+            --profile ci \
+            --env-var SALAMBO_API_KEY \
+            --api-url "${SALAMBO_API_URL:-https://api.salambo.ai}"
+        env:
+          SALAMBO_API_KEY: ${{ secrets.SALAMBO_API_KEY }}
+          SALAMBO_API_URL: ${{ vars.SALAMBO_API_URL }}
+
+      - name: Deploy immutable source
+        run: |
+          salambo deploy \
+            --profile ci \
+            --source . \
+            --config salambo.yaml \
+            --commit "$GITHUB_SHA"
+        env:
+          # Only include env vars referenced by salambo.yaml `secrets.*.fromEnv`.
+          # Example: this template syncs OPENAI_API_KEY as an agent secret.
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

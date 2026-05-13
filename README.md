@@ -45,7 +45,7 @@ This repo includes `salambo.yaml`. It is deployment configuration only:
 
 Agent behavior and instructions do **not** live in `salambo.yaml`. Customize behavior through Pi-native files under `harness-config/` and workspace `.pi/` overrides.
 
-Deploy with:
+Deploy immutable source with:
 
 ```bash
 node /path/to/salambo_app/packages/cli/build/index.js auth set \
@@ -53,11 +53,24 @@ node /path/to/salambo_app/packages/cli/build/index.js auth set \
   --api-url "$SALAMBO_BASE_URL" \
   --profile default
 
-node /path/to/salambo_app/packages/cli/build/index.js deploy --profile default
-node /path/to/salambo_app/packages/cli/build/index.js smoke "Say hello" --profile default
+OPENAI_API_KEY=... node /path/to/salambo_app/packages/cli/build/index.js deploy \
+  --profile default \
+  --source . \
+  --config salambo.yaml \
+  --commit "$(git rev-parse HEAD)"
 ```
 
-`salambo deploy` builds and pushes the GHCR image, creates a new Pi snapshot named `<snapshot.name>-<git-sha>` by default, finds/creates the agent by slug, upserts env/secrets, attaches runtime config to the resolved snapshot, and sets active state from `agent.isActive`.
+`salambo deploy --source .` uploads the source archive and compiled Pi/brain manifest to Salambo. Salambo then owns the Depot image build, Daytona snapshot creation, deployment activation, and rollback-safe active deployment pointer.
+
+Secrets in `salambo.yaml` use `fromEnv`. This template declares `OPENAI_API_KEY`, so the shell or CI environment running deploy must provide `OPENAI_API_KEY` to sync it as an agent secret. Do not put raw secret values in `salambo.yaml`.
+
+The legacy `salambo deploy` path without `--source` still builds and pushes the GHCR image locally. Prefer `--source` for hosted immutable deployments.
+
+A GitHub Actions starter is available at:
+
+```text
+.github/workflows/deploy.yml.example
+```
 
 ## Stable Contract
 
