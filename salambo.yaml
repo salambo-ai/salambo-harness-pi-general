@@ -38,8 +38,8 @@ secrets:
   OPENAI_API_KEY:
     fromEnv: OPENAI_API_KEY
     description: OpenAI provider key.
-    allowedHosts:
-      - api.openai.com
+    exposeTo:
+      - runtime
 
 extensions:
   - path: .salambo/extensions/smoke.mjs

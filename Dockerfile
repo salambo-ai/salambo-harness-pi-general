@@ -1,5 +1,6 @@
-# Use Node.js because the sandbox runtimes target Node >= 20
-FROM node:20-slim
+# Inherit the Salambo-owned sandbox runtime so compatible runs can use
+# the baked /opt/salambo extension sidecar instead of per-run injection.
+FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-4a736563
 
 WORKDIR /app
 
@@ -32,14 +33,14 @@ RUN if grep -Eq '\S' /tmp/image-config/npm-tools.txt; then \
 # Install harness bootstrap script
 RUN sed -i 's/\r$//' /tmp/image-config/bootstrap.sh && chmod +x /tmp/image-config/bootstrap.sh && /tmp/image-config/bootstrap.sh
 
-# Create workspace and Salambo runtime directories.
+# Create workspace and run-state directories.
 # /workspace is the agent/customer hands area.
-# /opt/salambo and /run/salambo are reserved for Salambo-owned runtime sidecars.
+# /opt/salambo is inherited platform-owned baked runtime from the base image.
+# /run/salambo is writable per-run platform state/override space.
 RUN mkdir -p \
       /workspace \
-      /opt/salambo/extension-host \
       /run/salambo/extension-host && \
-    chown -R node:node /workspace /opt/salambo /run/salambo && \
+    chown -R node:node /workspace /run/salambo && \
     chmod 755 /opt/salambo /opt/salambo/extension-host && \
     chmod 700 /run/salambo /run/salambo/extension-host
 
