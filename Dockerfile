@@ -2,6 +2,10 @@
 # the baked /opt/salambo extension sidecar instead of per-run injection.
 FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-4a736563
 
+# The base image is production-oriented, but this Dockerfile compiles TypeScript
+# during image build and therefore needs dev dependencies until the final env.
+ENV NODE_ENV=development
+
 WORKDIR /app
 
 # Copy package files and install dependencies
