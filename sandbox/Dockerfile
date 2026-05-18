@@ -41,12 +41,18 @@ RUN PIP_PACKAGES="$(node -e "import('/app/sandbox/packages.mjs').then(({ default
     if [ -n "$PIP_PACKAGES" ]; then pip install --no-cache-dir $PIP_PACKAGES; fi
 
 # Copy initial workspace files and sandbox-readable agent resources.
+# /workspace is reserved for hands-side user work and outputs.
+# Agent resources are platform-owned inputs under /opt/salambo/agent.
 COPY --chown=node:node sandbox/workspace/ /workspace/
-RUN mkdir -p /workspace/.salambo/agent /workspace/agent/extensions
-COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
-COPY --chown=node:node agent/prompts /workspace/.salambo/agent/prompts
-COPY --chown=node:node agent/extensions /workspace/agent/extensions
-RUN chown -R node:node /workspace/.salambo /workspace/agent
+RUN mkdir -p /opt/salambo/agent/skills \
+      /opt/salambo/agent/prompts \
+      /opt/salambo/agent/extensions
+COPY --chown=root:root agent/system.md /opt/salambo/agent/system.md
+COPY --chown=root:root agent/settings.json /opt/salambo/agent/settings.json
+COPY --chown=root:root agent/skills/ /opt/salambo/agent/skills/
+COPY --chown=root:root agent/prompts/ /opt/salambo/agent/prompts/
+COPY --chown=root:root agent/extensions/ /opt/salambo/agent/extensions/
+RUN chmod -R u=rwX,go=rX /opt/salambo/agent
 
 COPY sandbox/entrypoint.sh /app/sandbox/entrypoint.sh
 RUN sed -i 's/\r$//' /app/sandbox/entrypoint.sh && chmod +x /app/sandbox/entrypoint.sh
