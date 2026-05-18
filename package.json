@@ -4,19 +4,16 @@
   "description": "Hands-only Salambo sandbox template for worker-owned Pi runs",
   "type": "module",
   "scripts": {
-    "start": "./start.sh",
-    "test": "node scripts/run-tests.mjs",
+    "test": "npm run sandbox:validate",
     "typecheck": "npm run sandbox:validate",
-    "sandbox:validate": "node scripts/materialize-image-config.mjs --check",
-    "sandbox:materialize": "node scripts/materialize-image-config.mjs",
+    "sandbox:validate": "node scripts/materialize-sandbox-config.mjs --check",
+    "sandbox:materialize": "node scripts/materialize-sandbox-config.mjs",
     "docker:build": "docker build -t salambo-harness-pi-general .",
     "docker:run": "docker run --rm salambo-harness-pi-general",
-    "image:build": "node scripts/docker-image.mjs build",
-    "image:push": "node scripts/docker-image.mjs push",
-    "image:release": "node scripts/docker-image.mjs release",
-    "image:print": "node scripts/docker-image.mjs print",
-    "compose:up": "docker compose up --build",
-    "compose:down": "docker compose down"
+    "image:build": "node scripts/image-release.mjs build",
+    "image:push": "node scripts/image-release.mjs push",
+    "image:release": "node scripts/image-release.mjs release",
+    "image:print": "node scripts/image-release.mjs print"
   },
   "keywords": [
     "salambo",

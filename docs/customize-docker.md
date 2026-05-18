@@ -1,27 +1,28 @@
-# Customize Docker
+# Customize Sandbox Packages
 
-The sandbox image config lives in:
+Edit:
 
 ```text
-sandbox-image/packages.mjs
+sandbox/packages.mjs
 ```
 
-That file is the source of truth for hands-side image additions:
+That file controls what is installed into the Daytona sandbox image:
 
-- `apt` system packages
-- `npm` global CLI tools
-- `pip` Python dependencies
-- `setup` one-off bootstrap shell steps
+- `apt`: Debian packages;
+- `npm`: global npm tools;
+- `pip`: Python packages;
+- `setup`: one-off shell setup.
 
-The hosted Pi brain does **not** run in this image. Salambo's worker owns the brain/session/model loop. Keep this config focused on tools and libraries that commands/extensions need inside `/workspace`.
-
-During Docker build, the repo materializes `packages.mjs` into temporary build inputs automatically.
-
-Use:
+Validate it with:
 
 ```bash
 npm run sandbox:validate
+```
+
+Materialize the generated install files with:
+
+```bash
 npm run sandbox:materialize
 ```
 
-Edit `Dockerfile` only when you need a deeper image change than the machine config can express.
+Edit `Dockerfile` only when the sandbox image needs a structural change that `sandbox/packages.mjs` cannot express.

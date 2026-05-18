@@ -6,7 +6,7 @@ This template ships Docker images through the local image helper scripts.
 
 Edit:
 
-- `sandbox-image/release.mjs`
+- `sandbox/release.mjs`
 
 Set the image repository, for example:
 
@@ -58,11 +58,11 @@ Also publish `latest` with:
 npm run image:release -- --latest
 ```
 
-## Machine Config Materialization
+## Sandbox Config Materialization
 
-The Docker build materializes machine inputs from:
+The Docker build materializes sandbox package inputs from:
 
-- `sandbox-image/packages.mjs`
+- `sandbox/packages.mjs`
 
 Inspect the generated build files locally with:
 

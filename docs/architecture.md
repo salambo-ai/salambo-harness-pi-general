@@ -1,55 +1,39 @@
 # Architecture
 
-This template is a hands-only Salambo sandbox image.
+This repository is the **hands** side of Salambo.
 
 ```text
-Salambo worker = Pi brain/session/model loop
-Daytona sandbox = hands/tools/extensions/resources
+Salambo app/worker = Pi brain, session, model loop, run lifecycle
+this repository    = Daytona sandbox image, tools, files, extensions
 ```
 
 ```mermaid
 flowchart TD
-  API[Responses API] --> Worker[Salambo worker]
-  Worker --> Harness[Pi AgentHarness]
-  Harness --> Tools[Worker built-in tools]
-  Harness --> ExtBridge[Extension bridge]
-  Tools --> Sandbox[Daytona sandbox]
-  ExtBridge --> Sidecar[Sandbox sidecar]
-  Sidecar --> Extension[.salambo/extensions]
-  Sandbox --> Workspace[/workspace]
-  Sandbox --> AgentResources[/workspace/.salambo/agent]
+  Worker[Salambo worker] --> Harness[Pi AgentHarness]
+  Harness --> Daytona[Daytona sandbox]
+  Harness --> Bridge[Extension bridge]
+  Bridge --> Sidecar[Sandbox sidecar]
+  Sidecar --> Extensions[/workspace/extensions]
+  Daytona --> Workspace[/workspace]
+  Daytona --> Skills[/workspace/.salambo/agent/skills]
+  Daytona --> Prompts[/workspace/.salambo/agent/prompts]
 ```
 
-## Responsibilities
-
-### Salambo worker
-
-- owns run lifecycle;
-- owns Pi session/model loop;
-- owns provider credentials and model selection;
-- emits run events and response projections;
-- starts/restarts the sandbox sidecar with fresh tokens;
-- talks to Daytona for file/process operations.
-
-### Sandbox image
-
-- provides OS/Python/npm tools;
-- contains initial workspace files;
-- contains agent resources under `/workspace/.salambo/agent`;
-- contains hosted extensions under `/workspace/.salambo/extensions`;
-- inherits baked Salambo runtime under `/opt/salambo`;
-- keeps a long-lived container process running for Daytona exec/file APIs.
-
-## Deliberately absent
-
-This repo should not contain a production in-sandbox agent server:
+## Source directories
 
 ```text
-/agent/query
-/agent/events/:sandboxId
-/workspace/files/sync
-sandbox-hosted Pi sessions
-sandbox S2 event bridge
+agent/       compiled into the Pi manifest and copied for model-readable references
+extensions/  copied to /workspace/extensions and loaded by the sidecar
+sandbox/     used to build the sandbox image
 ```
 
-Those belonged to the old architecture and now live in the Salambo app/worker runtime.
+## Sandbox directories
+
+```text
+/workspace                         working directory
+/workspace/.salambo/agent/skills   skill files
+/workspace/.salambo/agent/prompts  prompt template files
+/workspace/extensions              hosted extension modules
+/opt/salambo                       baked platform runtime
+/run/salambo                       per-run platform state
+```

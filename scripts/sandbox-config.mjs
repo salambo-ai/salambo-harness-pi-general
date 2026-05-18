@@ -2,19 +2,19 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export async function loadImageConfig(rootDir = process.cwd()) {
-  const modulePath = path.join(rootDir, 'sandbox-image', 'packages.mjs');
+export async function loadSandboxConfig(rootDir = process.cwd()) {
+  const modulePath = path.join(rootDir, 'sandbox', 'packages.mjs');
   const module = await import(pathToFileURL(modulePath).href);
   const config = module.default;
-  assertValidImageConfig(config);
+  assertValidSandboxConfig(config);
   return config;
 }
 
-export function assertValidImageConfig(config) {
+export function assertValidSandboxConfig(config) {
   const errors = [];
 
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
-    throw new Error('sandbox-image/packages.mjs must export an object');
+    throw new Error('sandbox/packages.mjs must export an object');
   }
 
   validateStringArray(config.apt, 'apt', errors);
@@ -30,7 +30,7 @@ export function assertValidImageConfig(config) {
   }
 }
 
-export function materializeImageConfig(config) {
+export function materializeSandboxConfig(config) {
   return {
     aptPackagesText: renderListFile(config.apt),
     npmToolsText: renderListFile(config.npm),
@@ -39,7 +39,7 @@ export function materializeImageConfig(config) {
   };
 }
 
-export async function writeMaterializedImageConfig(outDir, config) {
+export async function writeMaterializedSandboxConfig(outDir, config) {
   await mkdir(outDir, { recursive: true });
 
   await Promise.all([

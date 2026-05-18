@@ -14,7 +14,7 @@ This template is now hands-only. The Salambo worker owns Pi brain/session/model 
 ### Nice To Have
 
 - add release automation/docs polish for the image name;
-- add examples for common Python/Node tool stacks in `sandbox-image/packages.mjs`;
+- add examples for common Python/Node tool stacks in `sandbox/packages.mjs`;
 - add a small fixture extension for sidecar hook/tool testing.
 
 ### Working Principle
