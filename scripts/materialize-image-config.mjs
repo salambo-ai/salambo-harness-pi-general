@@ -15,7 +15,7 @@ const imageConfig = await loadImageConfig();
 const materialized = materializeImageConfig(imageConfig);
 
 if (checkOnly) {
-  console.log('[sandbox-config] harness-config/docker.mjs OK');
+  console.log('[sandbox-config] sandbox-image/packages.mjs OK');
   process.exit(0);
 }
 

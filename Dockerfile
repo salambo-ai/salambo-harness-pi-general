@@ -7,7 +7,7 @@ WORKDIR /app
 # Materialize sandbox image inputs. This template is hands-only: Salambo's
 # worker owns the Pi brain/session/model loop, while this image provides tools,
 # workspace files, resources, and hosted extension code.
-COPY harness-config/docker.mjs ./harness-config/docker.mjs
+COPY sandbox-image/packages.mjs ./sandbox-image/packages.mjs
 COPY scripts/image-config.mjs scripts/materialize-image-config.mjs ./scripts/
 RUN node scripts/materialize-image-config.mjs /tmp/image-config
 
@@ -45,7 +45,7 @@ RUN if grep -Eq '\S' /tmp/image-config/requirements.txt; then \
     fi
 
 # Copy initial workspace files and sandbox-readable agent resources.
-COPY --chown=node:node harness-config/initial-workspace/ /workspace/
+COPY --chown=node:node sandbox-image/workspace/ /workspace/
 RUN mkdir -p /workspace/.salambo/agent
 COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
 COPY --chown=node:node agent/prompts /workspace/.salambo/agent/prompts

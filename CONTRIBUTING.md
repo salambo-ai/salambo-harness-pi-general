@@ -14,9 +14,9 @@ Thanks for contributing to this template.
 Run:
 
 ```bash
-npm run harness:validate
+npm run sandbox:validate
 npm test
-npm run harness:materialize
+npm run sandbox:materialize
 ```
 
 If your change touches Docker or runtime bootstrap, also build the image locally when practical:
@@ -32,8 +32,8 @@ docker build .
 - `start.sh`
 - `agent/**` resource layout
 - `.salambo/extensions/**` hosted extension layout
-- `harness-config/docker.mjs`
-- `harness-config/initial-workspace/**`
+- `sandbox-image/packages.mjs`
+- `sandbox-image/workspace/**`
 - `/workspace`, `/workspace/.salambo`, `/opt/salambo`, and `/run/salambo` path invariants
 
 ## What Is Not Part of This Template Anymore

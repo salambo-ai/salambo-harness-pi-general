@@ -26,7 +26,7 @@ flowchart TD
 
 ```bash
 npm install
-npm run harness:validate
+npm run sandbox:validate
 npm test
 ```
 
@@ -73,8 +73,8 @@ Stable hosted surfaces are file/image/resource surfaces, not an in-sandbox HTTP 
 - `agent/skills/**` becomes Pi skill resources and is copied to `/workspace/.salambo/agent/skills`.
 - `agent/prompts/**` becomes Pi prompt template resources and is copied to `/workspace/.salambo/agent/prompts`.
 - `.salambo/extensions/**` contains hosted extension code executed through the Salambo sidecar.
-- `harness-config/initial-workspace/**` seeds `/workspace`.
-- `harness-config/docker.mjs` declares OS/npm/pip/bootstrap image additions.
+- `sandbox-image/workspace/**` seeds `/workspace`.
+- `sandbox-image/packages.mjs` declares OS/npm/pip/bootstrap image additions.
 - `/opt/salambo` comes from the Salambo base image and contains baked platform runtime code.
 - `/run/salambo` is writable per-run platform state.
 
@@ -91,10 +91,10 @@ agent/
   prompts/
 .salambo/
   extensions/
-harness-config/
-  docker.mjs
-  image.config.mjs
-  initial-workspace/
+sandbox-image/
+  packages.mjs              # OS/npm/pip/bootstrap additions
+  release.mjs               # optional local image release settings
+  workspace/                 # files copied into /workspace
 workspace/                 # local-only bind mount
 docker-compose.yml          # local-only
 scripts/
@@ -105,7 +105,7 @@ scripts/
 Edit:
 
 ```text
-harness-config/docker.mjs
+sandbox-image/packages.mjs
 ```
 
 It controls:
@@ -118,7 +118,7 @@ It controls:
 The Docker build materializes this file into install inputs with:
 
 ```bash
-npm run harness:materialize
+npm run sandbox:materialize
 ```
 
 ## Hosted extensions
@@ -153,9 +153,9 @@ The Salambo CLI compiles them into the immutable deployment manifest. The worker
 ## Commands
 
 ```bash
-npm run harness:validate
+npm run sandbox:validate
 npm test
-npm run harness:materialize
+npm run sandbox:materialize
 npm run image:print
 npm run image:release
 npm run docker:build

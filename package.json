@@ -6,9 +6,9 @@
   "scripts": {
     "start": "./start.sh",
     "test": "node scripts/run-tests.mjs",
-    "typecheck": "node scripts/materialize-image-config.mjs --check",
-    "harness:validate": "node scripts/materialize-image-config.mjs --check",
-    "harness:materialize": "node scripts/materialize-image-config.mjs",
+    "typecheck": "npm run sandbox:validate",
+    "sandbox:validate": "node scripts/materialize-image-config.mjs --check",
+    "sandbox:materialize": "node scripts/materialize-image-config.mjs",
     "docker:build": "docker build -t salambo-harness-pi-general .",
     "docker:run": "docker run --rm salambo-harness-pi-general",
     "image:build": "node scripts/docker-image.mjs build",

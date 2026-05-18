@@ -39,13 +39,13 @@ test('rejects invalid image config shapes', () => {
   );
 });
 
-test('loadImageConfig validates harness-config/docker.mjs', async () => {
+test('loadImageConfig validates sandbox-image/packages.mjs', async () => {
   const rootDir = await mkdtemp(path.join(tmpdir(), 'salambo-image-config-'));
 
   try {
-    await mkdirp(path.join(rootDir, 'harness-config'));
+    await mkdirp(path.join(rootDir, 'sandbox-image'));
     await writeFile(
-      path.join(rootDir, 'harness-config', 'docker.mjs'),
+      path.join(rootDir, 'sandbox-image', 'packages.mjs'),
       'export default { apt: [], npm: [], pip: [], setup: "" };\n',
       'utf8',
     );

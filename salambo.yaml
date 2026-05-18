@@ -32,7 +32,7 @@ runtimeConfig:
 env:
   MODEL:
     value: gpt-5.2
-    description: Default model mirrored from harness-config/pi-agent-home/settings.json.
+    description: Default model mirrored from agent/settings.json.
 
 secrets:
   OPENAI_API_KEY:
@@ -51,4 +51,4 @@ local:
   composeFile: docker-compose.yml
   composeService: sandbox
   workspaceDir: ./workspace
-  piHome: ./harness-config/pi-agent-home
+  piHome: ./workspace/.pi

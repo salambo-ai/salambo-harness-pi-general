@@ -5,9 +5,9 @@ This repo tests the hands-only sandbox template, not a sandbox-hosted agent serv
 Run:
 
 ```bash
-npm run harness:validate
+npm run sandbox:validate
 npm test
-npm run harness:materialize
+npm run sandbox:materialize
 ```
 
 For Docker changes, also run:
@@ -18,7 +18,7 @@ docker build .
 
 ## What tests cover
 
-- `harness-config/docker.mjs` shape validation;
+- `sandbox-image/packages.mjs` shape validation;
 - materialized apt/npm/pip/bootstrap files;
 - Docker build inputs used by the sandbox image.
 

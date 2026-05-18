@@ -20,7 +20,7 @@ npm install
 
 echo ""
 echo "3. Validating sandbox image config..."
-npm run harness:validate
+npm run sandbox:validate
 
 echo ""
 echo "4. Running tests..."
@@ -30,7 +30,7 @@ echo ""
 echo "=== Setup Complete ==="
 echo ""
 echo "Available commands:"
-echo "  npm run harness:validate    - Validate harness-config/docker.mjs"
+echo "  npm run sandbox:validate    - Validate sandbox-image/packages.mjs"
 echo "  npm test                    - Run template tests"
 echo "  npm run docker:build        - Build Docker image"
 echo "  npm run compose:up          - Start local hands sandbox"

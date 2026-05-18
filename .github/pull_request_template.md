@@ -7,7 +7,7 @@
 
 - [ ] `npm run typecheck`
 - [ ] `npm test`
-- [ ] `npm run harness:materialize`
+- [ ] `npm run sandbox:materialize`
 - [ ] Docs updated if the template surface or contract changed
 
 ## Contract Impact

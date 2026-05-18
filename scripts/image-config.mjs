@@ -3,7 +3,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export async function loadImageConfig(rootDir = process.cwd()) {
-  const modulePath = path.join(rootDir, 'harness-config', 'docker.mjs');
+  const modulePath = path.join(rootDir, 'sandbox-image', 'packages.mjs');
   const module = await import(pathToFileURL(modulePath).href);
   const config = module.default;
   assertValidImageConfig(config);
@@ -14,7 +14,7 @@ export function assertValidImageConfig(config) {
   const errors = [];
 
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
-    throw new Error('harness-config/docker.mjs must export an object');
+    throw new Error('sandbox-image/packages.mjs must export an object');
   }
 
   validateStringArray(config.apt, 'apt', errors);

@@ -1,13 +1,12 @@
 # Customize Workspace
 
-Use `harness-config/initial-workspace/` to preload files into `/workspace` in the sandbox image.
+Use `sandbox-image/workspace/` to preload files into `/workspace` in the sandbox image.
 
 Common locations:
 
-- `harness-config/initial-workspace/work/files/` for sample inputs;
-- `harness-config/initial-workspace/work/templates/` for starter assets;
-- `harness-config/initial-workspace/outputs/` for output examples;
-- `harness-config/initial-workspace/.pi/` for optional project-local Pi resources used during local/manual debugging.
+- `sandbox-image/workspace/work/files/` for sample inputs;
+- `sandbox-image/workspace/work/templates/` for starter assets;
+- `sandbox-image/workspace/outputs/` for output examples.
 
 Hosted production resources should normally live in the top-level Salambo layout instead:
 
