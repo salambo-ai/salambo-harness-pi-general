@@ -1,6 +1,4 @@
-import { defineImage } from '../src/platform/image-schema.js';
-
-export default defineImage({
+export default {
   apt: [
     'git',
     'python3',
@@ -11,9 +9,9 @@ export default defineImage({
     'vim',
   ],
 
-  npm: [
-    '@mariozechner/pi-coding-agent',
-  ],
+  // Global npm tools installed into the sandbox image. Keep this list focused on
+  // hands-side tools. The hosted Pi brain runs in Salambo's worker, not here.
+  npm: [],
 
   pip: [
     'pandas==2.2.3',
@@ -31,4 +29,4 @@ export default defineImage({
   ],
 
   setup: '',
-});
+};

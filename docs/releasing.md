@@ -6,7 +6,7 @@ This template ships Docker images through the local image helper scripts.
 
 Edit:
 
-- `harness-config/image.config.mjs`
+- `sandbox-image/release.mjs`
 
 Set the image repository, for example:
 
@@ -62,10 +62,10 @@ npm run image:release -- --latest
 
 The Docker build materializes machine inputs from:
 
-- `harness-config/docker.ts`
+- `sandbox-image/packages.mjs`
 
 Inspect the generated build files locally with:
 
 ```bash
-npm run harness:materialize
+npm run sandbox:materialize
 ```

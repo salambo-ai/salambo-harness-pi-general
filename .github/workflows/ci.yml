@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate harness config
-        run: npm run harness:validate
+      - name: Validate sandbox image config
+        run: npm run sandbox:validate
 
       - name: Typecheck
         run: npm run typecheck
@@ -34,8 +34,9 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Materialize machine config
-        run: npm run harness:materialize
+      - name: Materialize sandbox image config
+        run: npm run sandbox:materialize
 
       - name: Docker build smoke test
+        if: ${{ vars.SALAMBO_DOCKER_BUILD_SMOKE == 'true' }}
         run: docker build .

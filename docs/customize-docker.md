@@ -1,16 +1,27 @@
 # Customize Docker
 
-The machine/runtime config lives in `harness-config/docker.ts`.
+The sandbox image config lives in:
 
-That file is the source of truth for:
+```text
+sandbox-image/packages.mjs
+```
+
+That file is the source of truth for hands-side image additions:
 
 - `apt` system packages
 - `npm` global CLI tools
 - `pip` Python dependencies
 - `setup` one-off bootstrap shell steps
 
-By default this pi template installs the `pi` CLI globally in Docker for debugging and operator convenience, while the runtime itself uses the local Node dependency graph for the embedded SDK flow.
+The hosted Pi brain does **not** run in this image. Salambo's worker owns the brain/session/model loop. Keep this config focused on tools and libraries that commands/extensions need inside `/workspace`.
 
-During Docker build, the repo materializes `docker.ts` into temporary build inputs automatically.
+During Docker build, the repo materializes `packages.mjs` into temporary build inputs automatically.
 
-Edit `Dockerfile` only when you need a deeper image change than the typed machine config can express.
+Use:
+
+```bash
+npm run sandbox:validate
+npm run sandbox:materialize
+```
+
+Edit `Dockerfile` only when you need a deeper image change than the machine config can express.

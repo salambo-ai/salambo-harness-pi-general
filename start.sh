@@ -1,22 +1,11 @@
 #!/bin/bash
-# Start the API server in the foreground.
+# Keep the hands-only sandbox alive for Salambo worker-controlled runs.
 
-export PORT=${PORT:-3000}
-export PI_HOME=${PI_HOME:-/home/node/.pi/agent}
+set -euo pipefail
 
-mkdir -p "$PI_HOME"
+export WORKSPACE_DIR=${WORKSPACE_DIR:-/workspace}
 
-if [ -d /app/harness-config/pi-agent-home ]; then
-  cp -R -n /app/harness-config/pi-agent-home/. "$PI_HOME"/
-fi
-
-if [ ! -f "$PI_HOME/auth.json" ] && [ -f /tmp/pi-host-auth.json ]; then
-  cp /tmp/pi-host-auth.json "$PI_HOME/auth.json"
-fi
-
-if [ -n "${OPENAI_API_KEY:-}" ] && [ ! -f "$PI_HOME/auth.json" ]; then
-  node -e 'const fs=require("fs"); const path=require("path"); const home=process.env.PI_HOME; const file=path.join(home,"auth.json"); fs.mkdirSync(home,{recursive:true}); fs.writeFileSync(file, JSON.stringify({ openai: { type: "api_key", key: process.env.OPENAI_API_KEY } }, null, 2));'
-fi
+mkdir -p "$WORKSPACE_DIR" /run/salambo/extension-host
 
 if [ -n "${EGRESS_PROXY_CA_CERT_PEM_B64:-}" ] || [ -n "${EGRESS_PROXY_CA_CERT_PEM:-}" ]; then
   export SANDBOX_EGRESS_PROXY_CA_PATH="${NODE_EXTRA_CA_CERTS:-${REQUESTS_CA_BUNDLE:-${SSL_CERT_FILE:-/tmp/salambo-egress-proxy-ca.pem}}}"
@@ -60,5 +49,10 @@ process.stdout.write(finalPath);
   unset EGRESS_PROXY_CA_CERT_PEM_B64
 fi
 
-echo "Starting Agent API on port $PORT..."
-node dist/src/server.js
+echo "Starting Salambo hands sandbox."
+echo "  Workspace: $WORKSPACE_DIR"
+echo "  Runtime:   /opt/salambo"
+echo "  Run state: /run/salambo"
+echo "  Brain:     worker-owned"
+
+exec sleep infinity

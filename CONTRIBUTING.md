@@ -4,19 +4,19 @@ Thanks for contributing to this template.
 
 ## Working Principles
 
-- Protect platform compatibility first.
-- Optimize for confidence, not raw coverage.
+- Preserve the worker-owned brain / sandbox-hands split.
 - Keep the customizable surface easy to understand.
-- Avoid changing the HTTP and S2 contracts casually.
+- Keep hosted extension code inside the sandbox.
+- Keep platform runtime code out of the template unless it belongs in the base image.
 
 ## Before Opening a PR
 
 Run:
 
 ```bash
-npm run typecheck
+npm run sandbox:validate
 npm test
-npm run harness:materialize
+npm run sandbox:materialize
 ```
 
 If your change touches Docker or runtime bootstrap, also build the image locally when practical:
@@ -27,26 +27,33 @@ docker build .
 
 ## What We Protect Strictly
 
-- `src/routes/*`
-- `src/core/agent-runner.ts`
-- `src/core/event-store.ts`
-- bootstrap/runtime behavior
-- HTTP contract
-- S2 event contract
+- `salambo.yaml`
+- `Dockerfile`
+- `start.sh`
+- `agent/**` resource layout
+- `.salambo/extensions/**` hosted extension layout
+- `sandbox-image/packages.mjs`
+- `sandbox-image/workspace/**`
+- `/workspace`, `/workspace/.salambo`, `/opt/salambo`, and `/run/salambo` path invariants
 
-See [docs/testing.md](docs/testing.md) and [docs/event-contract.md](docs/event-contract.md).
+## What Is Not Part of This Template Anymore
 
-## What Should Stay Flexible
+Do not reintroduce the old sandbox-hosted brain/server contract:
 
-- `harness-config/pi-agent-home/`
-- `harness-config/docker.ts`
-- `harness-config/initial-workspace/`
+```text
+/agent/query
+/agent/events/:sandboxId
+/workspace/files/sync
+Express server runtime
+sandbox-hosted Pi sessions
+sandbox S2 event bridge
+```
 
-This is a template, so the framework should be stable while the configuration surface stays easy to customize.
+The Salambo worker owns the Pi brain/session/model loop.
 
 ## PR Expectations
 
 - Keep changes scoped.
-- Add or update tests when changing contract-sensitive behavior.
+- Add or update tests when changing image config or path invariants.
 - Update docs when a user-facing setup or invariant changes.
 - Call out breaking changes explicitly.
