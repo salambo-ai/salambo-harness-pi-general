@@ -1,178 +1,225 @@
-# Salambo Harness Pi General
+# Salambo Pi General
 
-Hands-only sandbox template for Salambo worker-owned Pi runs.
-
-This repo no longer runs a sandbox-hosted Pi brain or `/agent/query` HTTP server. The production runtime is:
+Minimal Salambo template for a worker-owned Pi agent.
 
 ```text
-Salambo worker = Pi brain/session/model loop
-Daytona sandbox = tools, files, skills/prompts, hosted extensions, sidecar runtime
+Salambo worker = brain, model loop, run lifecycle
+this repo      = agent config + sandbox image inputs
 ```
 
-```mermaid
-flowchart TD
-  API[Responses API] --> Worker[Salambo worker]
-  Worker --> Pi[Pi AgentHarness]
-  Pi --> Tools[Worker-owned tools]
-  Pi --> Bridge[Extension bridge]
-  Tools --> Sandbox[Daytona sandbox]
-  Bridge --> Sidecar[Sandbox sidecar]
-  Sidecar --> Extensions[.salambo/extensions]
-  Sandbox --> Workspace[/workspace]
-  Sandbox --> Resources[/workspace/.salambo/agent]
+## File map
+
+```text
+agent/
+  settings.json        Model and active tools.
+  system.md            Base system prompt.
+  skills/              Pi skills.
+  prompts/             Pi prompt templates.
+  extensions/          Hosted extension code.
+
+sandbox/
+  Dockerfile           Builds the Daytona sandbox image.
+  packages.mjs         apt/npm/pip packages and setup script.
+  workspace/           Files copied into /workspace.
+  entrypoint.sh        Keeps the sandbox container alive.
+
+salambo.yaml           Deploy config.
+.env.example           Local deploy/smoke env example.
 ```
 
-## Quickstart
+Rule:
+
+```text
+Agent behavior goes in agent/.
+Machine setup goes in sandbox/.
+```
+
+There is intentionally no app server, no `/agent/query`, and no Pi brain in this repo.
+
+## Configure the agent
+
+### 1. Choose the model and active tools
+
+Edit:
+
+```text
+agent/settings.json
+```
+
+Example:
+
+```json
+{
+  "model": {
+    "provider": "openai",
+    "model": "gpt-5.2",
+    "thinkingLevel": "low"
+  },
+  "tools": ["bash", "lookup_customer"]
+}
+```
+
+Built-in tools such as `bash` are provided by the Salambo worker. Extension tools must be registered by files in `agent/extensions/` and listed here if you want them active.
+
+### 2. Set the base system prompt
+
+Edit:
+
+```text
+agent/system.md
+```
+
+### 3. Add skills
+
+Add Pi skills under:
+
+```text
+agent/skills/<skill-name>/SKILL.md
+```
+
+The Salambo CLI compiles these into the deployment manifest and the Dockerfile also copies them to:
+
+```text
+/workspace/.salambo/agent/skills
+```
+
+### 4. Add prompt templates
+
+Add prompt templates under:
+
+```text
+agent/prompts/
+```
+
+They are copied to:
+
+```text
+/workspace/.salambo/agent/prompts
+```
+
+### 5. Add hosted extensions
+
+Put extension modules in:
+
+```text
+agent/extensions/
+```
+
+Then declare them in `salambo.yaml`:
+
+```yaml
+extensions:
+  - path: agent/extensions/smoke.mjs
+    mode: auto
+```
+
+Extensions run in the sandbox sidecar, not in the worker.
+
+Use `.mjs` because this template has no `package.json`; `.mjs` tells Node the file is an ES module.
+
+## Configure the sandbox machine
+
+### Install packages
+
+Edit:
+
+```text
+sandbox/packages.mjs
+```
+
+```js
+export default {
+  apt: ['git', 'python3'],
+  npm: [],
+  pip: ['pandas==2.2.3'],
+  setup: '',
+};
+```
+
+### Seed workspace files
+
+Files in:
+
+```text
+sandbox/workspace/
+```
+
+are copied into:
+
+```text
+/workspace
+```
+
+Use this for starter files, sample inputs, templates, or expected output folders.
+
+## Configure deploy settings
+
+Edit:
+
+```text
+salambo.yaml
+```
+
+Most commonly changed fields:
+
+```yaml
+name: my-agent
+
+agent:
+  name: My Agent
+  slug: my-agent
+  description: What this agent does.
+
+runtimeConfig:
+  egressPolicyMode: restricted
+  egressAllowlist:
+    - api.openai.com
+
+secrets:
+  OPENAI_API_KEY:
+    fromEnv: OPENAI_API_KEY
+    exposeTo:
+      - runtime
+```
+
+`image.repository` is still present because the current `salambo.yaml` v1 schema requires it. Hosted source deploys build into Salambo-managed Depot registry; you do not publish this image yourself.
+
+## Local checks
 
 ```bash
-npm install
-npm run sandbox:validate
-npm test
+node --check agent/extensions/smoke.mjs
+node --input-type=module -e "const c=(await import('./sandbox/packages.mjs')).default; for (const k of ['apt','npm','pip']) if (!Array.isArray(c[k]) || c[k].some((x)=>typeof x !== 'string')) throw new Error(k); if (typeof c.setup !== 'string') throw new Error('setup'); console.log('sandbox/packages.mjs OK')"
 ```
 
-Build the sandbox image locally:
+If you have access to the private base image registry:
 
 ```bash
-npm run docker:build
+docker build -f sandbox/Dockerfile .
 ```
 
-Run it locally as a long-lived hands sandbox:
+## Deploy
+
+Set env vars from `.env.example`, then run:
 
 ```bash
-npm run compose:up
-```
-
-The container intentionally has no HTTP API. It stays alive so Salambo/Daytona can execute commands and read/write files.
-
-## Deployment
-
-Deploy immutable source with the Salambo CLI from the app monorepo:
-
-```bash
-node /path/to/salambo_app/packages/cli/build/index.js auth set \
-  --env-var SALAMBO_API_KEY \
-  --api-url "$SALAMBO_BASE_URL" \
-  --profile default
-
-OPENAI_API_KEY=... node /path/to/salambo_app/packages/cli/build/index.js deploy \
+node /path/to/salambo_app/packages/cli/build/index.js deploy \
   --profile default \
   --source . \
   --config salambo.yaml \
   --commit "$(git rev-parse HEAD)"
 ```
 
-`salambo deploy --source .` uploads the source archive and compiled Pi manifest. Salambo owns Depot image build, Daytona snapshot creation, deployment activation, and rollback-safe active deployment pointers.
+`salambo deploy --source .` uploads this repo plus the compiled Pi manifest. Salambo builds the image, creates the Daytona snapshot, and activates the deployment.
 
-## Hosted runtime contract
+## Runtime paths
 
-Stable hosted surfaces are file/image/resource surfaces, not an in-sandbox HTTP server:
-
-- `salambo.yaml` declares deployment metadata, env/secrets, runtime config, and hosted extensions.
-- `agent/settings.json` declares default model and active tools.
-- `agent/system.md` becomes the base system prompt.
-- `agent/skills/**` becomes Pi skill resources and is copied to `/workspace/.salambo/agent/skills`.
-- `agent/prompts/**` becomes Pi prompt template resources and is copied to `/workspace/.salambo/agent/prompts`.
-- `.salambo/extensions/**` contains hosted extension code executed through the Salambo sidecar.
-- `sandbox-image/workspace/**` seeds `/workspace`.
-- `sandbox-image/packages.mjs` declares OS/npm/pip/bootstrap image additions.
-- `/opt/salambo` comes from the Salambo base image and contains baked platform runtime code.
-- `/run/salambo` is writable per-run platform state.
-
-## Repo shape
+Inside the sandbox:
 
 ```text
-salambo.yaml
-Dockerfile
-start.sh
-agent/
-  settings.json
-  system.md
-  skills/
-  prompts/
-.salambo/
-  extensions/
-sandbox-image/
-  packages.mjs              # OS/npm/pip/bootstrap additions
-  release.mjs               # optional local image release settings
-  workspace/                 # files copied into /workspace
-workspace/                 # local-only bind mount
-docker-compose.yml          # local-only
-scripts/
+/workspace                         working directory
+/workspace/.salambo/agent/skills   skill files
+/workspace/.salambo/agent/prompts  prompt templates
+/workspace/agent/extensions        hosted extension modules
+/opt/salambo                       baked Salambo runtime from the base image
+/run/salambo                       per-run writable platform state
 ```
-
-## Customizing the sandbox image
-
-Edit:
-
-```text
-sandbox-image/packages.mjs
-```
-
-It controls:
-
-- `apt`: Debian packages;
-- `npm`: optional global hands-side npm tools;
-- `pip`: Python packages installed into `/opt/pyenv`;
-- `setup`: one-off shell setup.
-
-The Docker build materializes this file into install inputs with:
-
-```bash
-npm run sandbox:materialize
-```
-
-## Hosted extensions
-
-Add hosted extension modules under:
-
-```text
-.salambo/extensions/
-```
-
-Declare them in `salambo.yaml`:
-
-```yaml
-extensions:
-  - path: .salambo/extensions/smoke.mjs
-    mode: auto
-```
-
-The worker starts the sidecar with a fresh token for each run/restart. Extension code runs in the sandbox, never in the worker.
-
-## Agent resources
-
-Add skills and prompt templates under:
-
-```text
-agent/skills/
-agent/prompts/
-```
-
-The Salambo CLI compiles them into the immutable deployment manifest. The worker passes them to Pi as `AgentHarnessResources`.
-
-## Commands
-
-```bash
-npm run sandbox:validate
-npm test
-npm run sandbox:materialize
-npm run image:print
-npm run image:release
-npm run docker:build
-npm run compose:up
-```
-
-## What was removed
-
-The old sandbox-hosted brain/server path has been removed from this template:
-
-```text
-/agent/query
-/agent/events/:sandboxId
-/workspace/files/sync
-sandbox-hosted Pi sessions
-sandbox S2 event bridge
-Express server runtime
-```
-
-Those responsibilities now belong to the Salambo app/worker runtime.

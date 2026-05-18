@@ -3,22 +3,24 @@ name: salambo-harness-pi-general
 runtime: pi
 
 image:
+  # Required by salambo.yaml v1 schema. Hosted source deploys build into
+  # Salambo-managed Depot registry; this is not used for local publishing.
   repository: ghcr.io/salambo-ai/salambo-harness-pi-general
   tag: git-sha
   context: .
-  dockerfile: Dockerfile
+  dockerfile: sandbox/Dockerfile
   platform: linux/amd64
   buildArgs: {}
 
 snapshot:
   name: salambo-harness-pi-general
-  entrypoint: /app/start.sh
+  entrypoint: /app/sandbox/entrypoint.sh
   size: s
 
 agent:
   name: Salambo Pi Harness
   slug: salambo-harness-pi-general
-  description: General-purpose Pi agent harness.
+  description: General-purpose Pi sandbox agent.
   icon: 🤖
   isActive: true
 
@@ -42,13 +44,5 @@ secrets:
       - runtime
 
 extensions:
-  - path: .salambo/extensions/smoke.mjs
+  - path: agent/extensions/smoke.mjs
     mode: auto
-
-local:
-  mode: docker
-  port: 3000
-  composeFile: docker-compose.yml
-  composeService: sandbox
-  workspaceDir: ./workspace
-  piHome: ./workspace/.pi
