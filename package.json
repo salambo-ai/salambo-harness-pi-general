@@ -9,11 +9,7 @@
     "sandbox:validate": "node scripts/materialize-sandbox-config.mjs --check",
     "sandbox:materialize": "node scripts/materialize-sandbox-config.mjs",
     "docker:build": "docker build -t salambo-harness-pi-general .",
-    "docker:run": "docker run --rm salambo-harness-pi-general",
-    "image:build": "node scripts/image-release.mjs build",
-    "image:push": "node scripts/image-release.mjs push",
-    "image:release": "node scripts/image-release.mjs release",
-    "image:print": "node scripts/image-release.mjs print"
+    "docker:run": "docker run --rm salambo-harness-pi-general"
   },
   "keywords": [
     "salambo",

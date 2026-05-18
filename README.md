@@ -22,9 +22,8 @@ sandbox/                Sandbox image inputs.
   packages.mjs          apt/npm/pip/bootstrap additions.
   workspace/            Files copied into `/workspace`.
   entrypoint.sh         Long-lived sandbox process.
-  release.mjs           Optional local Docker image release config.
 
-scripts/                Small local helper scripts for sandbox image config.
+scripts/                Tiny sandbox config helper scripts.
 Dockerfile              Builds the Daytona sandbox image.
 salambo.yaml            Salambo deploy config.
 ```
@@ -122,7 +121,5 @@ It controls:
 ```bash
 npm run sandbox:validate
 npm run sandbox:materialize
-npm run image:print
-npm run image:release
 npm run docker:build
 ```
