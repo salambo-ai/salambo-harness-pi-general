@@ -1,19 +1,18 @@
 # Testing
 
-This template keeps tests intentionally small.
+This template intentionally has no test framework.
 
-Run:
+Run the validation commands from `README.md`:
 
 ```bash
-npm run sandbox:validate
-npm test
-npm run sandbox:materialize
+node --check agent/extensions/smoke.mjs
+node --input-type=module -e "const c=(await import('./sandbox/packages.mjs')).default; for (const k of ['apt','npm','pip']) if (!Array.isArray(c[k]) || c[k].some((x)=>typeof x !== 'string')) throw new Error(k); if (typeof c.setup !== 'string') throw new Error('setup'); console.log('sandbox/packages.mjs OK')"
 ```
 
-`npm test` currently validates the sandbox package config. Full run behavior is tested by deployed Salambo smokes, because the Pi brain and run lifecycle live in the Salambo app/worker.
+Full run behavior is tested by deployed Salambo smokes, because the Pi brain and run lifecycle live in the Salambo app/worker.
 
 For Docker changes, also run when you have base-image registry access:
 
 ```bash
-npm run docker:build
+docker build -f sandbox/Dockerfile .
 ```

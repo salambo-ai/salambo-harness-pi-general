@@ -1,27 +1,18 @@
 # Contributing
 
-This repo is a Salambo hands sandbox template.
-
 Keep the ownership split clear:
 
 ```text
-agent/      brain inputs compiled by Salambo CLI
-extensions/ sandbox extension code
-sandbox/    sandbox image inputs
+agent/    agent-specific behavior and extension code
+sandbox/  sandbox-machine image inputs
 ```
 
-Before opening a PR, run:
+Before opening a PR, run the local validation commands from `README.md`.
+
+If you changed `sandbox/Dockerfile` or `sandbox/**`, also build the image when you have base-image registry access:
 
 ```bash
-npm run sandbox:validate
-npm test
-npm run sandbox:materialize
-```
-
-If you changed `Dockerfile` or `sandbox/**`, also build the image when you have base-image registry access:
-
-```bash
-npm run docker:build
+docker build -f sandbox/Dockerfile .
 ```
 
 Protect these path contracts:
@@ -30,7 +21,7 @@ Protect these path contracts:
 /workspace
 /workspace/.salambo/agent/skills
 /workspace/.salambo/agent/prompts
-/workspace/extensions
+/workspace/agent/extensions
 /opt/salambo
 /run/salambo
 ```

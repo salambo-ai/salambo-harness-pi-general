@@ -5,19 +5,13 @@
 
 ## Checks
 
-- [ ] `npm run typecheck`
-- [ ] `npm test`
-- [ ] `npm run sandbox:materialize`
+- [ ] `node --check agent/extensions/smoke.mjs`
+- [ ] sandbox packages validation command from README
 - [ ] Docs updated if the template surface changed
 
 ## Sandbox Impact
 
 - [ ] No change to `salambo.yaml`
-- [ ] No change to Docker/image packages
+- [ ] No change to `sandbox/Dockerfile` or `sandbox/packages.mjs`
 - [ ] No change to workspace/resource paths
 - [ ] Breaking change explained below
-
-## Notes
-
-- Mention any Docker/bootstrap/runtime implications.
-- Mention any follow-up work or intentional gaps.

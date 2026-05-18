@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/salambo-ai/salambo-harness-pi-general
   tag: git-sha
   context: .
-  dockerfile: Dockerfile
+  dockerfile: sandbox/Dockerfile
   platform: linux/amd64
   buildArgs: {}
 
@@ -44,5 +44,5 @@ secrets:
       - runtime
 
 extensions:
-  - path: extensions/smoke.mjs
+  - path: agent/extensions/smoke.mjs
     mode: auto

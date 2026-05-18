@@ -4,25 +4,22 @@ FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-4a736563
 
 WORKDIR /app
 
-# Materialize sandbox image inputs. This template is hands-only: Salambo's
-# worker owns the Pi brain/session/model loop, while this image provides tools,
-# workspace files, resources, and hosted extension code.
 COPY sandbox/packages.mjs ./sandbox/packages.mjs
-COPY scripts/sandbox-config.mjs scripts/materialize-sandbox-config.mjs ./scripts/
-RUN node scripts/materialize-sandbox-config.mjs /tmp/sandbox-config
 
 # Install sandbox system packages.
 RUN apt-get update && \
-    grep -Ev '^\s*(#|$)' /tmp/sandbox-config/apt-packages.txt | xargs -r apt-get install -y && \
+    APT_PACKAGES="$(node -e "import('/app/sandbox/packages.mjs').then(({ default: config }) => console.log(config.apt.join(' ')))")" && \
+    if [ -n "$APT_PACKAGES" ]; then apt-get install -y $APT_PACKAGES; fi && \
     rm -rf /var/lib/apt/lists/*
 
 # Install optional global npm tools for hands-side execution.
-RUN if grep -Eq '\S' /tmp/sandbox-config/npm-tools.txt; then \
-      grep -Ev '^\s*(#|$)' /tmp/sandbox-config/npm-tools.txt | xargs -r npm install -g; \
-    fi
+RUN NPM_TOOLS="$(node -e "import('/app/sandbox/packages.mjs').then(({ default: config }) => console.log(config.npm.join(' ')))")" && \
+    if [ -n "$NPM_TOOLS" ]; then npm install -g $NPM_TOOLS; fi
 
 # Run optional sandbox bootstrap script.
-RUN sed -i 's/\r$//' /tmp/sandbox-config/bootstrap.sh && chmod +x /tmp/sandbox-config/bootstrap.sh && /tmp/sandbox-config/bootstrap.sh
+RUN node -e "import('/app/sandbox/packages.mjs').then(({ default: config }) => process.stdout.write(config.setup))" > /tmp/salambo-sandbox-setup.sh && \
+    if [ -s /tmp/salambo-sandbox-setup.sh ]; then sh /tmp/salambo-sandbox-setup.sh; fi && \
+    rm -f /tmp/salambo-sandbox-setup.sh
 
 # Create workspace and run-state directories.
 # /workspace is the agent/customer hands area.
@@ -40,20 +37,17 @@ RUN python3 -m venv /opt/pyenv
 ENV PATH="/opt/pyenv/bin:${PATH}"
 
 # Install Python packages for hands-side work.
-RUN if grep -Eq '\S' /tmp/sandbox-config/requirements.txt; then \
-      pip install --no-cache-dir -r /tmp/sandbox-config/requirements.txt; \
-    fi
+RUN PIP_PACKAGES="$(node -e "import('/app/sandbox/packages.mjs').then(({ default: config }) => console.log(config.pip.join(' ')))")" && \
+    if [ -n "$PIP_PACKAGES" ]; then pip install --no-cache-dir $PIP_PACKAGES; fi
 
 # Copy initial workspace files and sandbox-readable agent resources.
 COPY --chown=node:node sandbox/workspace/ /workspace/
-RUN mkdir -p /workspace/.salambo/agent
+RUN mkdir -p /workspace/.salambo/agent /workspace/agent/extensions
 COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
 COPY --chown=node:node agent/prompts /workspace/.salambo/agent/prompts
-RUN mkdir -p /workspace/extensions
-COPY --chown=node:node extensions /workspace/extensions
-RUN chown -R node:node /workspace/.salambo /workspace/extensions
+COPY --chown=node:node agent/extensions /workspace/agent/extensions
+RUN chown -R node:node /workspace/.salambo /workspace/agent
 
-# Minimal sandbox entrypoint. The worker controls runs through Daytona exec/file APIs.
 COPY sandbox/entrypoint.sh /app/sandbox/entrypoint.sh
 RUN sed -i 's/\r$//' /app/sandbox/entrypoint.sh && chmod +x /app/sandbox/entrypoint.sh
 

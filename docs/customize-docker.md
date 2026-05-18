@@ -1,4 +1,4 @@
-# Customize Sandbox Packages
+# Customize the Sandbox Machine
 
 Edit:
 
@@ -13,16 +13,10 @@ That file controls what is installed into the Daytona sandbox image:
 - `pip`: Python packages;
 - `setup`: one-off shell setup.
 
-Validate it with:
+The Dockerfile lives next to it:
 
-```bash
-npm run sandbox:validate
+```text
+sandbox/Dockerfile
 ```
 
-Materialize the generated install files with:
-
-```bash
-npm run sandbox:materialize
-```
-
-Edit `Dockerfile` only when the sandbox image needs a structural change that `sandbox/packages.mjs` cannot express.
+Edit the Dockerfile only when the sandbox image needs a structural change that `sandbox/packages.mjs` cannot express.

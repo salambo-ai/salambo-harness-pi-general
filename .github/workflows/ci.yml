@@ -4,9 +4,7 @@ on:
   pull_request:
   push:
     branches:
-      - master
       - main
-      - claude/evaluate-sdk-usefulness-utkli
 
 jobs:
   verify:
@@ -20,23 +18,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Check extension syntax
+        run: node --check agent/extensions/smoke.mjs
 
-      - name: Validate sandbox image config
-        run: npm run sandbox:validate
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
-
-      - name: Materialize sandbox image config
-        run: npm run sandbox:materialize
+      - name: Validate sandbox packages
+        run: |
+          node --input-type=module -e "const c=(await import('./sandbox/packages.mjs')).default; for (const k of ['apt','npm','pip']) if (!Array.isArray(c[k]) || c[k].some((x)=>typeof x !== 'string')) throw new Error(k); if (typeof c.setup !== 'string') throw new Error('setup'); console.log('sandbox/packages.mjs OK')"
 
       - name: Docker build smoke test
         if: ${{ vars.SALAMBO_DOCKER_BUILD_SMOKE == 'true' }}
-        run: docker build .
+        run: docker build -f sandbox/Dockerfile .

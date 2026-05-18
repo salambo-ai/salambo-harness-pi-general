@@ -22,10 +22,5 @@ Agent resources do not go here. Put them in:
 agent/skills/
 agent/prompts/
 agent/system.md
-```
-
-Hosted extension code does not go here. Put it in:
-
-```text
-extensions/
+agent/extensions/
 ```
