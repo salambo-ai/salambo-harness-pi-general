@@ -8,12 +8,13 @@
 - [ ] `npm run typecheck`
 - [ ] `npm test`
 - [ ] `npm run sandbox:materialize`
-- [ ] Docs updated if the template surface or contract changed
+- [ ] Docs updated if the template surface changed
 
-## Contract Impact
+## Sandbox Impact
 
-- [ ] No HTTP contract change
-- [ ] No S2 event contract change
+- [ ] No change to `salambo.yaml`
+- [ ] No change to Docker/image packages
+- [ ] No change to workspace/resource paths
 - [ ] Breaking change explained below
 
 ## Notes
