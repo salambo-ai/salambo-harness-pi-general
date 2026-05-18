@@ -62,7 +62,7 @@ npm run image:release -- --latest
 
 The Docker build materializes machine inputs from:
 
-- `harness-config/docker.ts`
+- `harness-config/docker.mjs`
 
 Inspect the generated build files locally with:
 

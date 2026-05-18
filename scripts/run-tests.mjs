@@ -31,7 +31,7 @@ if (testFiles.length === 0) {
   process.exit(1);
 }
 
-const child = spawn(process.execPath, ['--import', 'tsx', '--test', ...testFiles], {
+const child = spawn(process.execPath, ['--test', ...testFiles], {
   stdio: 'inherit',
   cwd: root,
 });

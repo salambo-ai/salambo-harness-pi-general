@@ -1,76 +1,55 @@
 # Architecture
 
-This repo is split into three layers.
+This template is a hands-only Salambo sandbox image.
 
-## 1. Platform Code
+```text
+Salambo worker = Pi brain/session/model loop
+Daytona sandbox = hands/tools/extensions/resources
+```
 
-Located in:
+```mermaid
+flowchart TD
+  API[Responses API] --> Worker[Salambo worker]
+  Worker --> Harness[Pi AgentHarness]
+  Harness --> Tools[Worker built-in tools]
+  Harness --> ExtBridge[Extension bridge]
+  Tools --> Sandbox[Daytona sandbox]
+  ExtBridge --> Sidecar[Sandbox sidecar]
+  Sidecar --> Extension[.salambo/extensions]
+  Sandbox --> Workspace[/workspace]
+  Sandbox --> AgentResources[/workspace/.salambo/agent]
+```
 
-- `src/routes/`
-- `src/core/`
-- `src/platform/`
+## Responsibilities
 
-This layer owns:
+### Salambo worker
 
-- HTTP endpoints
-- sandbox lifecycle orchestration
-- event emission
-- workspace setup and sync plumbing
-- the adapter from the Salambo contract to the inner agent runtime
+- owns run lifecycle;
+- owns Pi session/model loop;
+- owns provider credentials and model selection;
+- emits run events and response projections;
+- starts/restarts the sandbox sidecar with fresh tokens;
+- talks to Daytona for file/process operations.
 
-This layer should stay stable.
+### Sandbox image
 
-## 2. Harness Configuration
+- provides OS/Python/npm tools;
+- contains initial workspace files;
+- contains agent resources under `/workspace/.salambo/agent`;
+- contains hosted extensions under `/workspace/.salambo/extensions`;
+- inherits baked Salambo runtime under `/opt/salambo`;
+- keeps a long-lived container process running for Daytona exec/file APIs.
 
-Located in:
+## Deliberately absent
 
-- `harness-config/pi-agent-home/`
-- `harness-config/docker.ts`
-- `harness-config/initial-workspace/`
-- `harness-config/image.config.mjs`
+This repo should not contain a production in-sandbox agent server:
 
-This is the template customization surface.
+```text
+/agent/query
+/agent/events/:sandboxId
+/workspace/files/sync
+sandbox-hosted Pi sessions
+sandbox S2 event bridge
+```
 
-Use it to control:
-
-- template-level pi runtime settings and resources
-- machine/runtime packages and setup
-- initial filesystem contents, including workspace `.pi/` overrides
-- image publishing defaults
-
-## 3. Human Docs
-
-Located in:
-
-- `docs/`
-
-This layer explains:
-
-- architecture
-- event contract
-- testing expectations
-- release flow
-- customization entrypoints
-
-## Runtime Flow
-
-1. The HTTP API receives a sandbox request.
-2. The platform layer prepares the workspace and event sink.
-3. Startup seeds runtime `PI_HOME` from `harness-config/pi-agent-home/`.
-4. The runner creates or resumes a pi session with `agentDir = PI_HOME` and `cwd = /workspace`, so pi sees both seeded defaults and workspace `.pi/` overrides.
-5. On resume, the runner asks pi for persisted sessions in that workspace and opens the one whose pi session id matches the caller-provided `sessionId`.
-6. The sandbox emits:
-   - `sandbox.run.*` lifecycle events
-   - raw `session.event` payloads
-7. The platform consumes those events downstream for logging, SSE, and projections.
-
-## Invariants
-
-These should not change lightly:
-
-- route shapes under `src/routes/`
-- `sandbox.run.*` lifecycle events
-- `session.event` transport shape
-- `/workspace/work` and `/workspace/outputs` semantics
-- bootstrap/auth behavior in Docker
-- pi should be configured through native `PI_HOME` and workspace `.pi/` surfaces, not a parallel sandbox config layer
+Those belonged to the old architecture and now live in the Salambo app/worker runtime.

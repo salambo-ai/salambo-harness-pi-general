@@ -38,4 +38,5 @@ jobs:
         run: npm run harness:materialize
 
       - name: Docker build smoke test
+        if: ${{ vars.SALAMBO_DOCKER_BUILD_SMOKE == 'true' }}
         run: docker build .

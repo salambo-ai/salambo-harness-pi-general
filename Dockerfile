@@ -2,39 +2,26 @@
 # the baked /opt/salambo extension sidecar instead of per-run injection.
 FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-4a736563
 
-# The base image is production-oriented, but this Dockerfile compiles TypeScript
-# during image build and therefore needs dev dependencies until the final env.
-ENV NODE_ENV=development
-
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+# Materialize sandbox image inputs. This template is hands-only: Salambo's
+# worker owns the Pi brain/session/model loop, while this image provides tools,
+# workspace files, resources, and hosted extension code.
+COPY harness-config/docker.mjs ./harness-config/docker.mjs
+COPY scripts/image-config.mjs scripts/materialize-image-config.mjs ./scripts/
+RUN node scripts/materialize-image-config.mjs /tmp/image-config
 
-# Copy source + harness config for build
-COPY src ./src
-COPY harness-config ./harness-config
-COPY scripts ./scripts
-COPY tsconfig.json ./
-
-# Build TypeScript
-RUN npm run build
-
-# Materialize docker build inputs from harness-config/docker.ts
-RUN node --import tsx scripts/materialize-image-config.mjs /tmp/image-config
-
-# Install harness system packages
+# Install sandbox system packages.
 RUN apt-get update && \
     grep -Ev '^\s*(#|$)' /tmp/image-config/apt-packages.txt | xargs -r apt-get install -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Install harness npm tools
+# Install optional global npm tools for hands-side execution.
 RUN if grep -Eq '\S' /tmp/image-config/npm-tools.txt; then \
       grep -Ev '^\s*(#|$)' /tmp/image-config/npm-tools.txt | xargs -r npm install -g; \
     fi
 
-# Install harness bootstrap script
+# Run optional sandbox bootstrap script.
 RUN sed -i 's/\r$//' /tmp/image-config/bootstrap.sh && chmod +x /tmp/image-config/bootstrap.sh && /tmp/image-config/bootstrap.sh
 
 # Create workspace and run-state directories.
@@ -48,16 +35,16 @@ RUN mkdir -p \
     chmod 755 /opt/salambo /opt/salambo/extension-host && \
     chmod 700 /run/salambo /run/salambo/extension-host
 
-# Create isolated Python environment (PEP 668 compliant)
+# Create isolated Python environment (PEP 668 compliant).
 RUN python3 -m venv /opt/pyenv
 ENV PATH="/opt/pyenv/bin:${PATH}"
 
-# Install Python packages
+# Install Python packages for hands-side work.
 RUN if grep -Eq '\S' /tmp/image-config/requirements.txt; then \
       pip install --no-cache-dir -r /tmp/image-config/requirements.txt; \
     fi
 
-# Copy initial workspace files and sandbox-readable agent resources
+# Copy initial workspace files and sandbox-readable agent resources.
 COPY --chown=node:node harness-config/initial-workspace/ /workspace/
 RUN mkdir -p /workspace/.salambo/agent
 COPY --chown=node:node agent/skills /workspace/.salambo/agent/skills
@@ -66,20 +53,14 @@ RUN mkdir -p /workspace/.salambo/extensions
 COPY --chown=node:node .salambo/extensions /workspace/.salambo/extensions
 RUN chown -R node:node /workspace/.salambo
 
-# Copy startup script
+# Minimal sandbox entrypoint. There is intentionally no /agent/query server in
+# this image; the worker controls runs through Daytona exec/file APIs.
 COPY start.sh /app/start.sh
 RUN sed -i 's/\r$//' /app/start.sh && chmod +x /app/start.sh
 
-# Switch to non-root user
 USER node
 
 ENV WORKSPACE_DIR=/workspace
-ENV PI_HOME=/home/node/.pi/agent
 ENV NODE_ENV=production
-
-EXPOSE 3000
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
 
 CMD ["/app/start.sh"]

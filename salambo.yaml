@@ -49,6 +49,6 @@ local:
   mode: docker
   port: 3000
   composeFile: docker-compose.yml
-  composeService: harness
+  composeService: sandbox
   workspaceDir: ./workspace
   piHome: ./harness-config/pi-agent-home

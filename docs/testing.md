@@ -1,59 +1,37 @@
 # Testing
 
-This template optimizes for confidence, not coverage percentage.
+This repo tests the hands-only sandbox template, not a sandbox-hosted agent server.
 
-If the tests pass, maintainers should have strong confidence that:
+Run:
 
-- the platform contract still holds
-- the sandbox still boots
-- event emission still matches expectations
-- the config surface still loads correctly
+```bash
+npm run harness:validate
+npm test
+npm run harness:materialize
+```
 
-## Current Test Layers
+For Docker changes, also run:
 
-### Unit Tests
+```bash
+docker build .
+```
 
-Protect:
+## What tests cover
 
-- event-store behavior
-- runner event ordering
-- machine-config loading and materialization
+- `harness-config/docker.mjs` shape validation;
+- materialized apt/npm/pip/bootstrap files;
+- Docker build inputs used by the sandbox image.
 
-### API Contract Tests
+## What tests intentionally do not cover here
 
-Protect:
+The production Pi brain/session/model loop is owned by the Salambo worker and is tested in the Salambo app repo. This template no longer tests:
 
-- `/health`
-- `/agent/*`
-- `/workspace/*`
+```text
+/agent/query
+/agent/events/:sandboxId
+/workspace/files/sync
+sandbox-hosted Pi sessions
+sandbox S2 event projection
+```
 
-These tests focus on request validation, status codes, and payload shape.
-
-### Smoke Tests
-
-Protect:
-
-- server boot
-- route mounting
-- config validation wiring
-
-## Confidence Targets
-
-We care most about:
-
-- `src/routes/*`
-- `src/core/agent-runner.ts`
-- `src/core/event-store.ts`
-- bootstrap/runtime behavior
-- HTTP contract stability
-- S2 event contract stability
-
-## What We Do Not Overfit
-
-Because this repo is a template, we avoid over-testing:
-
-- the exact prompt wording in `harness-config/pi-agent-home/SYSTEM.md`
-- the exact starter files in `harness-config/initial-workspace/`
-- user-specific Docker customizations
-
-The framework should be rigid where the platform depends on it, and flexible where users customize it.
+Use deployed Salambo smoke tests to validate the full worker + Daytona + sidecar path.

@@ -1,26 +1,27 @@
 # Backlog
 
-## Pi Template Hardening
+## Hands Sandbox Template Hardening
 
-This template already preserves the Salambo contract, but it still needs a few follow-up improvements before it feels fully polished as a standalone pi template.
+This template is now hands-only. The Salambo worker owns Pi brain/session/model execution.
 
 ### Highest Priority
 
-- persist the pi session registry across process restarts instead of keeping it in memory only
-- tighten the `PI_HOME` auth/bootstrap story for Docker and local development
-- add an explicit resume-focused integration test against the pi runner adapter
+- validate a deployed smoke run after the slim image change;
+- add a Docker smoke test that boots the image and verifies the container stays alive;
+- document recommended `agent/settings.json` variants for different models/providers;
+- clarify local development flow for hosted extensions without reintroducing an in-sandbox brain.
 
 ### Nice To Have
 
-- document recommended `settings.json` variants for different models/providers
-- add a Docker smoke test that boots the image and checks `/health`
-- add release automation/docs polish for the new image name
+- add release automation/docs polish for the image name;
+- add examples for common Python/Node tool stacks in `harness-config/docker.mjs`;
+- add a small fixture extension for sidecar hook/tool testing.
 
 ### Working Principle
 
 For this template, improvements should optimize for:
 
-- contract safety
-- deterministic tests
-- clear customization points
-- pi-native ergonomics without changing Salambo-facing behavior
+- worker-owned brain / sandbox-hands separation;
+- deterministic image builds;
+- clear customization points;
+- no hidden platform server in the sandbox.
