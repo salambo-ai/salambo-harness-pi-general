@@ -1,6 +1,6 @@
 # Inherit the Salambo-owned sandbox runtime so compatible runs can use
 # the baked /opt/salambo extension sidecar instead of per-run injection.
-FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-4a736563
+FROM registry.depot.dev/94nv410m7k:salambo-sandbox-runtime-base-v2-570fc4dc
 
 WORKDIR /app
 
