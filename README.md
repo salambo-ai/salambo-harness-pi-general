@@ -32,9 +32,29 @@ Rule:
 ```text
 Agent behavior goes in agent/.
 Machine setup goes in sandbox/.
+Builder macro guidance goes in .agents/skills/.
 ```
 
 There is intentionally no app server, no `/agent/query`, and no Pi brain in this repo.
+
+## Builder macro skills
+
+This repo includes project-local macro skills for engineers and coding assistants under:
+
+```text
+.agents/skills/
+```
+
+These are not runtime skills for the deployed agent. They explain how to customize this template repo.
+
+Use them when editing the template:
+
+- `salambo-template-overview` for repo structure and file ownership.
+- `salambo-customize-agent` for system prompt, settings, runtime skills, and prompts.
+- `salambo-sandbox-customization` for dependencies, Docker, and workspace files.
+- `salambo-extensions` for custom hosted tools.
+- `salambo-artifact-publishing` for generated files and run artifacts.
+- `salambo-chat-integrations` for Slack/Teams behavior and chat-safe responses.
 
 ## Configure the agent
 
