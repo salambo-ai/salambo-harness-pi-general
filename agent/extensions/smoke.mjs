@@ -2,15 +2,17 @@ let observedProviderResponse = false;
 
 export default function extension(pi) {
   pi.on('before_agent_start', async (event) => {
-    if (event.prompt.includes('MODEL_SELECT_SMOKE')) {
+    if (event.prompt.includes('MODEL_UPDATE_SMOKE')) {
       await pi.setModel({ provider: 'openai', id: 'gpt-5.4-mini', thinkingLevel: 'low' });
 
       return {
-        message: {
-          customType: 'hosted-model-select-smoke',
-          content: [{ type: 'text', text: 'Answer exactly MODEL_SELECT_OK and do not call tools.' }],
-          display: 'hidden',
-        },
+        messages: [
+          {
+            customType: 'hosted-model-update-smoke',
+            content: [{ type: 'text', text: 'Answer exactly MODEL_UPDATE_OK and do not call tools.' }],
+            display: 'hidden',
+          },
+        ],
       };
     }
 
@@ -19,11 +21,13 @@ export default function extension(pi) {
     }
 
     return {
-      message: {
-        customType: 'hosted-before-agent-start-smoke',
-        content: [{ type: 'text', text: 'Answer exactly BEFORE_AGENT_START_OK and do not call tools.' }],
-        display: 'hidden',
-      },
+      messages: [
+        {
+          customType: 'hosted-before-agent-start-smoke',
+          content: [{ type: 'text', text: 'Answer exactly BEFORE_AGENT_START_OK and do not call tools.' }],
+          display: 'hidden',
+        },
+      ],
       systemPrompt: `${event.systemPrompt}\nWhen the user asks BEFORE_AGENT_START_SMOKE, answer exactly BEFORE_AGENT_START_OK and do not call tools.`,
     };
   });
@@ -49,17 +53,19 @@ export default function extension(pi) {
     };
   });
 
-  pi.on('before_provider_request', (event) => {
+  pi.on('before_provider_payload', (event) => {
     const encoded = JSON.stringify(event.payload);
-    if (!encoded.includes('BEFORE_PROVIDER_REQUEST_SMOKE')) {
+    if (!encoded.includes('BEFORE_PROVIDER_PAYLOAD_SMOKE')) {
       return undefined;
     }
 
-    return replaceStringValues(
-      event.payload,
-      'BEFORE_PROVIDER_REQUEST_SMOKE',
-      'Answer exactly PROVIDER_REQUEST_HOOK_OK and do not call tools.',
-    );
+    return {
+      payload: replaceStringValues(
+        event.payload,
+        'BEFORE_PROVIDER_PAYLOAD_SMOKE',
+        'Answer exactly PROVIDER_PAYLOAD_HOOK_OK and do not call tools.',
+      ),
+    };
   });
 
   pi.on('tool_call', (event) => {
