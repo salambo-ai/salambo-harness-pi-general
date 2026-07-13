@@ -3,10 +3,6 @@ name: salambo-harness-pi-general
 runtime: pi
 
 image:
-  # Required by salambo.yaml v1 schema. Hosted source deploys build into
-  # Salambo-managed Depot registry; this is not used for local publishing.
-  repository: ghcr.io/salambo-ai/salambo-harness-pi-general
-  tag: git-sha
   context: .
   dockerfile: sandbox/Dockerfile
   platform: linux/amd64
