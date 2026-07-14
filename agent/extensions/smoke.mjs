@@ -1,4 +1,6 @@
 let observedProviderResponse = false;
+const MODEL_UPDATE_SMOKE_INSTRUCTION =
+  'When the user asks MODEL_UPDATE_SMOKE, answer exactly MODEL_UPDATE_OK and do not call tools.';
 
 export default function extension(pi) {
   pi.on('before_agent_start', async (event) => {
@@ -6,13 +8,7 @@ export default function extension(pi) {
       await pi.setModel({ provider: 'openai', id: 'gpt-5.4-mini', thinkingLevel: 'low' });
 
       return {
-        messages: [
-          {
-            customType: 'hosted-model-update-smoke',
-            content: [{ type: 'text', text: 'Answer exactly MODEL_UPDATE_OK and do not call tools.' }],
-            display: 'hidden',
-          },
-        ],
+        systemPrompt: `${event.systemPrompt}\n${MODEL_UPDATE_SMOKE_INSTRUCTION}`,
       };
     }
 
