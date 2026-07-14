@@ -140,6 +140,12 @@ requested Pi thinking level and returns `THINKING_LEVEL_OK:<level>`. These
 controls run inside the sandbox extension; they do not add a customer-facing
 platform endpoint or execute fixture code in the worker process.
 
+`DURABLE_RUNTIME_STATE_SMOKE` is the bounded two-turn SAL-199 fixture. On the
+marked first turn only, it selects OpenAI `gpt-5.4-mini` with `xhigh` thinking
+and makes `lookup_customer` the sole active tool. A follow-up prompt must omit
+the marker; this proves a fresh worker restored the native Pi session state
+instead of asking the extension to reapply it.
+
 `salambo.missing-secret.yaml` defines a separate staging-only agent with the
 same runtime but no provider secret. Deploy it with `--file
 salambo.missing-secret.yaml` to verify the bounded missing-auth failure without
