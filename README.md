@@ -133,6 +133,20 @@ extensions:
     mode: auto
 ```
 
+The staging fixture also exposes bounded prompt markers for advanced QA:
+`THINKING_LEVEL_SMOKE:minimal`, `THINKING_LEVEL_SMOKE:xhigh`, and
+`THINKING_LEVEL_SMOKE:max`. Each marker selects the same OpenAI model with the
+requested Pi thinking level and returns `THINKING_LEVEL_OK:<level>`. These
+controls run inside the sandbox extension; they do not add a customer-facing
+platform endpoint or execute fixture code in the worker process.
+
+`salambo.missing-secret.yaml` defines a separate staging-only agent with the
+same runtime but no provider secret. Deploy it with `--file
+salambo.missing-secret.yaml` to verify the bounded missing-auth failure without
+removing or changing credentials on the shared smoke agent. Its extension only
+registers the tools declared by the shared settings; it has no lifecycle hooks
+or model mutations, so the failure remains a pure provider-auth scenario.
+
 Extensions run in the sandbox sidecar, not in the worker.
 
 Use `.mjs` because this template has no `package.json`; `.mjs` tells Node the file is an ES module.
