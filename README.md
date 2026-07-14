@@ -143,7 +143,9 @@ platform endpoint or execute fixture code in the worker process.
 `salambo.missing-secret.yaml` defines a separate staging-only agent with the
 same runtime but no provider secret. Deploy it with `--file
 salambo.missing-secret.yaml` to verify the bounded missing-auth failure without
-removing or changing credentials on the shared smoke agent.
+removing or changing credentials on the shared smoke agent. Its extension only
+registers the tools declared by the shared settings; it has no lifecycle hooks
+or model mutations, so the failure remains a pure provider-auth scenario.
 
 Extensions run in the sandbox sidecar, not in the worker.
 
