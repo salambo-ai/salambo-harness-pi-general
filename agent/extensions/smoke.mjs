@@ -2,9 +2,20 @@ let observedProviderResponse = false;
 const MODEL_UPDATE_SMOKE_INSTRUCTION =
   'When the user asks MODEL_UPDATE_SMOKE, answer exactly MODEL_UPDATE_OK and do not call tools.';
 const THINKING_LEVEL_SMOKE_PATTERN = /\bTHINKING_LEVEL_SMOKE:(minimal|xhigh|max)\b/;
+const DURABLE_RUNTIME_STATE_SMOKE = 'DURABLE_RUNTIME_STATE_SMOKE';
+const DURABLE_RUNTIME_STATE_SMOKE_PATTERN = /\bDURABLE_RUNTIME_STATE_SMOKE\b/;
 
 export default function extension(pi) {
   pi.on('before_agent_start', async (event) => {
+    if (DURABLE_RUNTIME_STATE_SMOKE_PATTERN.test(event.prompt)) {
+      await pi.setModel({ provider: 'openai', id: 'gpt-5.4-mini', thinkingLevel: 'xhigh' });
+      await pi.setActiveTools(['lookup_customer']);
+
+      return {
+        systemPrompt: `${event.systemPrompt}\nWhen the user asks ${DURABLE_RUNTIME_STATE_SMOKE}, answer exactly DURABLE_RUNTIME_STATE_OK and do not call tools.`,
+      };
+    }
+
     const thinkingLevel = event.prompt.match(THINKING_LEVEL_SMOKE_PATTERN)?.[1];
     if (thinkingLevel) {
       await pi.setModel({ provider: 'openai', id: 'gpt-5.2', thinkingLevel });
