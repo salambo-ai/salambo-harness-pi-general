@@ -140,6 +140,11 @@ requested Pi thinking level and returns `THINKING_LEVEL_OK:<level>`. These
 controls run inside the sandbox extension; they do not add a customer-facing
 platform endpoint or execute fixture code in the worker process.
 
+`salambo.missing-secret.yaml` defines a separate staging-only agent with the
+same runtime but no provider secret. Deploy it with `--file
+salambo.missing-secret.yaml` to verify the bounded missing-auth failure without
+removing or changing credentials on the shared smoke agent.
+
 Extensions run in the sandbox sidecar, not in the worker.
 
 Use `.mjs` because this template has no `package.json`; `.mjs` tells Node the file is an ES module.
